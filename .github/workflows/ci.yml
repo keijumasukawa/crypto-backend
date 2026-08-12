@@ -18,5 +18,8 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm lint
       - run: pnpm format:check
+      - run: pnpm --filter db run generate
+        env:
+          DIRECT_URL: postgresql://placeholder:placeholder@localhost:5432/placeholder
       - run: pnpm typecheck
       - run: pnpm test
