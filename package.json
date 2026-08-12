@@ -15,5 +15,8 @@
   },
   "scripts": {
     "typecheck": "pnpm --recursive run typecheck"
+  },
+  "devDependencies": {
+    "prettier": "3.9.6"
   }
 }
