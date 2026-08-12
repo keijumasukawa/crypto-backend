@@ -15,6 +15,7 @@
   },
   "scripts": {
     "lint": "eslint .",
+    "test": "vitest",
     "typecheck": "pnpm --recursive run typecheck"
   },
   "devDependencies": {
@@ -23,6 +24,7 @@
     "eslint-config-prettier": "^10.1.8",
     "prettier": "3.9.6",
     "typescript": "catalog:",
-    "typescript-eslint": "^8.67.0"
+    "typescript-eslint": "^8.67.0",
+    "vitest": "^4.1.10"
   }
 }
