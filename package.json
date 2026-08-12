@@ -14,6 +14,7 @@
     }
   },
   "scripts": {
+    "format:check": "prettier --check .",
     "lint": "eslint .",
     "test": "vitest",
     "typecheck": "pnpm --recursive run typecheck"
