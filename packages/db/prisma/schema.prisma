@@ -1,0 +1,75 @@
+generator client {
+  provider            = "prisma-client"
+  output              = "../generated/prisma"
+  importFileExtension = "ts"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Symbol {
+  symbol      String   @id
+  baseAsset   String   @map("base_asset")
+  quoteAsset  String   @map("quote_asset")
+  onboardDate DateTime @map("onboard_date") @db.Timestamptz(3)
+  isActive    Boolean  @map("is_active")
+
+  @@map("symbols")
+}
+
+model Kline {
+  symbol                   String
+  interval                 String
+  openTime                 BigInt  @map("open_time")
+  open                     Decimal @db.Decimal(30, 10)
+  high                     Decimal @db.Decimal(30, 10)
+  low                      Decimal @db.Decimal(30, 10)
+  close                    Decimal @db.Decimal(30, 10)
+  volume                   Decimal @db.Decimal(30, 10)
+  closeTime                BigInt  @map("close_time")
+  quoteAssetVolume         Decimal @map("quote_asset_volume") @db.Decimal(30, 10)
+  numberOfTrades           Int     @map("number_of_trades")
+  takerBuyBaseAssetVolume  Decimal @map("taker_buy_base_asset_volume") @db.Decimal(30, 10)
+  takerBuyQuoteAssetVolume Decimal @map("taker_buy_quote_asset_volume") @db.Decimal(30, 10)
+
+  @@id([symbol, interval, openTime])
+  @@map("klines")
+}
+
+model IndicatorValue {
+  symbol       String
+  interval     String
+  openTime     BigInt   @map("open_time")
+  sma20        Decimal? @db.Decimal(30, 10)
+  sma50        Decimal? @db.Decimal(30, 10)
+  sma200       Decimal? @db.Decimal(30, 10)
+  ema12        Decimal? @db.Decimal(30, 10)
+  ema26        Decimal? @db.Decimal(30, 10)
+  rsi14        Decimal? @db.Decimal(30, 10)
+  macd         Decimal? @db.Decimal(30, 10)
+  macdSignal   Decimal? @map("macd_signal") @db.Decimal(30, 10)
+  macdHist     Decimal? @map("macd_hist") @db.Decimal(30, 10)
+  bbUpper      Decimal? @map("bb_upper") @db.Decimal(30, 10)
+  bbMiddle     Decimal? @map("bb_middle") @db.Decimal(30, 10)
+  bbLower      Decimal? @map("bb_lower") @db.Decimal(30, 10)
+  rsiAvgGain14 Decimal? @map("rsi_avg_gain14") @db.Decimal(30, 10)
+  rsiAvgLoss14 Decimal? @map("rsi_avg_loss14") @db.Decimal(30, 10)
+
+  @@id([symbol, interval, openTime])
+  @@map("indicator_values")
+}
+
+model Signal {
+  symbol       String
+  interval     String
+  openTime     BigInt   @map("open_time")
+  logicVersion String   @map("logic_version")
+  direction    String
+  score        Decimal  @db.Decimal(30, 10)
+  components   Json
+  generatedAt  DateTime @map("generated_at") @db.Timestamptz(3)
+
+  @@id([symbol, interval, openTime, logicVersion])
+  @@map("signals")
+}
