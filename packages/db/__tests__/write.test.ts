@@ -1,9 +1,9 @@
 import { describe, expect, it } from "vitest";
 import type { Prisma } from "../generated/prisma/client.ts";
 import {
-  upsertIndicatorValues,
-  upsertKlines,
-  upsertSignals,
+  updateIndicatorValues,
+  updateKlines,
+  updateSignals,
   type IndicatorValueRow,
   type KlineRow,
   type SignalRow,
@@ -73,14 +73,14 @@ function buildSignalRow(openTime: number): SignalRow {
   };
 }
 
-describe("upsertKlines", () => {
+describe("updateKlines", () => {
   it("2,500 行を 1,000 行ずつ 3 文に分割して実行する", async () => {
     const { executorStub, queries } = buildExecutorStub();
     const rows = Array.from({ length: 2500 }, (_, index) =>
       buildKlineRow(index),
     );
 
-    await upsertKlines(executorStub, rows);
+    await updateKlines(executorStub, rows);
 
     expect(queries).toHaveLength(3);
     expect(queries[0]?.values).toHaveLength(13000);
@@ -91,7 +91,7 @@ describe("upsertKlines", () => {
   it("0 行では SQL を実行しない", async () => {
     const { executorStub, queries } = buildExecutorStub();
 
-    await upsertKlines(executorStub, []);
+    await updateKlines(executorStub, []);
 
     expect(queries).toHaveLength(0);
   });
@@ -99,7 +99,7 @@ describe("upsertKlines", () => {
   it("主キー 3 列の ON CONFLICT 句と全更新列を含む", async () => {
     const { executorStub, queries } = buildExecutorStub();
 
-    await upsertKlines(executorStub, [buildKlineRow(0)]);
+    await updateKlines(executorStub, [buildKlineRow(0)]);
 
     const sqlText = queries[0]?.sql ?? "";
     expect(sqlText).toContain(
@@ -115,11 +115,11 @@ describe("upsertKlines", () => {
   });
 });
 
-describe("upsertIndicatorValues", () => {
+describe("updateIndicatorValues", () => {
   it("1 行あたりのパラメータ数が列数と一致する", async () => {
     const { executorStub, queries } = buildExecutorStub();
 
-    await upsertIndicatorValues(executorStub, [buildIndicatorValueRow(0)]);
+    await updateIndicatorValues(executorStub, [buildIndicatorValueRow(0)]);
 
     expect(queries[0]?.values).toHaveLength(17);
   });
@@ -127,18 +127,18 @@ describe("upsertIndicatorValues", () => {
   it("NULL の指標値をそのまま渡す", async () => {
     const { executorStub, queries } = buildExecutorStub();
 
-    await upsertIndicatorValues(executorStub, [buildIndicatorValueRow(0)]);
+    await updateIndicatorValues(executorStub, [buildIndicatorValueRow(0)]);
 
     expect(queries[0]?.values).toContain(null);
     expect(queries[0]?.values).toContain("66.6666666667");
   });
 });
 
-describe("upsertSignals", () => {
+describe("updateSignals", () => {
   it("主キー 4 列の ON CONFLICT 句を含む", async () => {
     const { executorStub, queries } = buildExecutorStub();
 
-    await upsertSignals(executorStub, [buildSignalRow(0)]);
+    await updateSignals(executorStub, [buildSignalRow(0)]);
 
     const sqlText = queries[0]?.sql ?? "";
     expect(sqlText).toContain(
@@ -150,7 +150,7 @@ describe("upsertSignals", () => {
   it("components を JSON 文字列として渡す", async () => {
     const { executorStub, queries } = buildExecutorStub();
 
-    await upsertSignals(executorStub, [buildSignalRow(0)]);
+    await updateSignals(executorStub, [buildSignalRow(0)]);
 
     expect(queries[0]?.values).toContain('{"maTrend":{"result":1,"weight":1}}');
   });
