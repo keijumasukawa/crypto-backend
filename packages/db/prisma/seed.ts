@@ -1,5 +1,4 @@
-import { PrismaPg } from "@prisma/adapter-pg";
-import { PrismaClient } from "../generated/prisma/client.ts";
+import { createPrismaClient } from "../src/client.ts";
 
 const SYMBOLS = [
   {
@@ -51,8 +50,7 @@ if (connectionString === undefined) {
   throw new Error("DIRECT_URL が設定されていません");
 }
 
-const adapter = new PrismaPg({ connectionString });
-const prisma = new PrismaClient({ adapter });
+const prisma = createPrismaClient(connectionString);
 
 async function main() {
   for (const { symbol, ...data } of SYMBOLS) {
