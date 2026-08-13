@@ -33,7 +33,7 @@ export type BinanceClientDependencies = {
   baseUrl?: string;
 };
 
-const DEFAULT_BASE_URL = "https://api.binance.com";
+const DEFAULT_BASE_URL = "https://data-api.binance.vision";
 const KLINES_PATH = "/api/v3/klines";
 const EXCHANGE_INFO_PATH = "/api/v3/exchangeInfo";
 const MAX_KLINES_PER_REQUEST = 1000;
