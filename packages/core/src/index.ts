@@ -3,4 +3,5 @@ export * from "./decimal.ts";
 export * from "./ema.ts";
 export * from "./macd.ts";
 export * from "./rsi.ts";
+export * from "./rule-v1.ts";
 export * from "./sma.ts";
