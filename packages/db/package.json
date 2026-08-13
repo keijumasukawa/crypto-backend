@@ -12,11 +12,15 @@
   },
   "devDependencies": {
     "@types/node": "catalog:",
+    "@types/pg": "^8.21.0",
     "dotenv": "^17.4.2",
     "prisma": "^7.9.1",
+    "tsx": "^4.23.12",
     "typescript": "catalog:"
   },
   "dependencies": {
-    "@prisma/client": "^7.9.1"
+    "@prisma/adapter-pg": "^7.9.1",
+    "@prisma/client": "^7.9.1",
+    "pg": "^8.23.0"
   }
 }
