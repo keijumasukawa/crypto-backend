@@ -61,7 +61,7 @@ function buildBatches<T>(rows: T[], size: number): T[][] {
   return batches;
 }
 
-export async function upsertKlines(
+export async function updateKlines(
   executor: SqlExecutor,
   rows: KlineRow[],
 ): Promise<void> {
@@ -90,7 +90,7 @@ export async function upsertKlines(
   }
 }
 
-export async function upsertIndicatorValues(
+export async function updateIndicatorValues(
   executor: SqlExecutor,
   rows: IndicatorValueRow[],
 ): Promise<void> {
@@ -123,7 +123,7 @@ export async function upsertIndicatorValues(
   }
 }
 
-export async function upsertSignals(
+export async function updateSignals(
   executor: SqlExecutor,
   rows: SignalRow[],
 ): Promise<void> {
