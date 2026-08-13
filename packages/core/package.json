@@ -12,5 +12,8 @@
   "devDependencies": {
     "@types/node": "catalog:",
     "typescript": "catalog:"
+  },
+  "dependencies": {
+    "decimal.js": "^10.6.0"
   }
 }
