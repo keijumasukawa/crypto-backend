@@ -18,21 +18,33 @@ export type SignalInput = {
   bbLower: Decimal | null;
 };
 
+export type PreviousSignalInput = {
+  close: Decimal | null;
+  sma50: Decimal | null;
+  sma200: Decimal | null;
+  rsi14: Decimal | null;
+  macdHist: Decimal | null;
+  bbUpper: Decimal | null;
+  bbLower: Decimal | null;
+};
+
 export type SignalDirection = "bullish" | "bearish" | "neutral";
 
 export type RuleResult = -1 | 0 | 1;
 
-export type SignalComponent = {
-  result: RuleResult;
+export type SignalRuleId =
+  "maTrend" | "maCross" | "rsiRecross" | "macdReversal" | "bollingerReversion";
+
+export type SignalRule = {
+  id: SignalRuleId;
+  value: RuleResult;
   weight: number;
+  evaluable: boolean;
 };
 
 export type SignalComponents = {
-  maTrend: SignalComponent;
-  maCross: SignalComponent;
-  rsiRecross: SignalComponent;
-  macdReversal: SignalComponent;
-  bollingerReversion: SignalComponent;
+  rules: SignalRule[];
+  evaluableCount: number;
 };
 
 export type Signal = {
@@ -41,121 +53,134 @@ export type Signal = {
   components: SignalComponents;
 };
 
-function calculateMaTrend(current: SignalInput): RuleResult {
+export type StoredSignalComponents = {
+  v: RuleResult[];
+  e: number;
+};
+
+type RuleEvaluation = {
+  value: RuleResult;
+  evaluable: boolean;
+};
+
+const UNEVALUABLE: RuleEvaluation = { value: 0, evaluable: false };
+
+function calculateMaTrend(current: SignalInput): RuleEvaluation {
   if (current.sma50 === null || current.sma200 === null) {
-    return 0;
+    return UNEVALUABLE;
   }
   if (
     current.close.greaterThan(current.sma50) &&
     current.sma50.greaterThan(current.sma200)
   ) {
-    return 1;
+    return { value: 1, evaluable: true };
   }
   if (
     current.close.lessThan(current.sma50) &&
     current.sma50.lessThan(current.sma200)
   ) {
-    return -1;
+    return { value: -1, evaluable: true };
   }
-  return 0;
+  return { value: 0, evaluable: true };
 }
 
 function calculateMaCross(
-  previous: SignalInput,
+  previous: PreviousSignalInput,
   current: SignalInput,
-): RuleResult {
+): RuleEvaluation {
   if (
     previous.sma50 === null ||
     previous.sma200 === null ||
     current.sma50 === null ||
     current.sma200 === null
   ) {
-    return 0;
+    return UNEVALUABLE;
   }
   if (
     previous.sma50.lessThanOrEqualTo(previous.sma200) &&
     current.sma50.greaterThan(current.sma200)
   ) {
-    return 1;
+    return { value: 1, evaluable: true };
   }
   if (
     previous.sma50.greaterThanOrEqualTo(previous.sma200) &&
     current.sma50.lessThan(current.sma200)
   ) {
-    return -1;
+    return { value: -1, evaluable: true };
   }
-  return 0;
+  return { value: 0, evaluable: true };
 }
 
 function calculateRsiRecross(
-  previous: SignalInput,
+  previous: PreviousSignalInput,
   current: SignalInput,
-): RuleResult {
+): RuleEvaluation {
   if (previous.rsi14 === null || current.rsi14 === null) {
-    return 0;
+    return UNEVALUABLE;
   }
   if (
     previous.rsi14.lessThan(RSI_OVERSOLD) &&
     current.rsi14.greaterThanOrEqualTo(RSI_OVERSOLD)
   ) {
-    return 1;
+    return { value: 1, evaluable: true };
   }
   if (
     previous.rsi14.greaterThan(RSI_OVERBOUGHT) &&
     current.rsi14.lessThanOrEqualTo(RSI_OVERBOUGHT)
   ) {
-    return -1;
+    return { value: -1, evaluable: true };
   }
-  return 0;
+  return { value: 0, evaluable: true };
 }
 
 function calculateMacdReversal(
-  previous: SignalInput,
+  previous: PreviousSignalInput,
   current: SignalInput,
-): RuleResult {
+): RuleEvaluation {
   if (previous.macdHist === null || current.macdHist === null) {
-    return 0;
+    return UNEVALUABLE;
   }
   if (
     previous.macdHist.lessThanOrEqualTo(0) &&
     current.macdHist.greaterThan(0)
   ) {
-    return 1;
+    return { value: 1, evaluable: true };
   }
   if (
     previous.macdHist.greaterThanOrEqualTo(0) &&
     current.macdHist.lessThan(0)
   ) {
-    return -1;
+    return { value: -1, evaluable: true };
   }
-  return 0;
+  return { value: 0, evaluable: true };
 }
 
 function calculateBollingerReversion(
-  previous: SignalInput,
+  previous: PreviousSignalInput,
   current: SignalInput,
-): RuleResult {
+): RuleEvaluation {
   if (
+    previous.close === null ||
     previous.bbUpper === null ||
     previous.bbLower === null ||
     current.bbUpper === null ||
     current.bbLower === null
   ) {
-    return 0;
+    return UNEVALUABLE;
   }
   if (
     previous.close.lessThan(previous.bbLower) &&
     current.close.greaterThanOrEqualTo(current.bbLower)
   ) {
-    return 1;
+    return { value: 1, evaluable: true };
   }
   if (
     previous.close.greaterThan(previous.bbUpper) &&
     current.close.lessThanOrEqualTo(current.bbUpper)
   ) {
-    return -1;
+    return { value: -1, evaluable: true };
   }
-  return 0;
+  return { value: 0, evaluable: true };
 }
 
 function calculateDirection(score: Decimal): SignalDirection {
@@ -169,44 +194,55 @@ function calculateDirection(score: Decimal): SignalDirection {
 }
 
 export function calculateRuleV1Signal(
-  previous: SignalInput,
+  previous: PreviousSignalInput,
   current: SignalInput,
 ): Signal {
-  const components: SignalComponents = {
-    maTrend: { result: calculateMaTrend(current), weight: RULE_WEIGHT },
-    maCross: {
-      result: calculateMaCross(previous, current),
+  const rules: SignalRule[] = [
+    { id: "maTrend", weight: RULE_WEIGHT, ...calculateMaTrend(current) },
+    {
+      id: "maCross",
       weight: RULE_WEIGHT,
+      ...calculateMaCross(previous, current),
     },
-    rsiRecross: {
-      result: calculateRsiRecross(previous, current),
+    {
+      id: "rsiRecross",
       weight: RULE_WEIGHT,
+      ...calculateRsiRecross(previous, current),
     },
-    macdReversal: {
-      result: calculateMacdReversal(previous, current),
+    {
+      id: "macdReversal",
       weight: RULE_WEIGHT,
+      ...calculateMacdReversal(previous, current),
     },
-    bollingerReversion: {
-      result: calculateBollingerReversion(previous, current),
+    {
+      id: "bollingerReversion",
       weight: RULE_WEIGHT,
+      ...calculateBollingerReversion(previous, current),
     },
-  };
+  ];
 
-  const componentList = Object.values(components);
-  const weightedSum = componentList.reduce(
-    (sum, component) =>
-      sum.plus(new Decimal(component.result).times(component.weight)),
+  const weightedSum = rules.reduce(
+    (sum, rule) => sum.plus(new Decimal(rule.value).times(rule.weight)),
     new Decimal(0),
   );
-  const totalWeight = componentList.reduce(
-    (sum, component) => sum + component.weight,
-    0,
-  );
+  const totalWeight = rules.reduce((sum, rule) => sum + rule.weight, 0);
   const score = roundDecimal(weightedSum.div(totalWeight));
+  const evaluableCount = rules.filter((rule) => rule.evaluable).length;
 
   return {
     direction: calculateDirection(score),
     score,
-    components,
+    components: { rules, evaluableCount },
   };
+}
+
+export function convertToStoredComponents(
+  components: SignalComponents,
+): StoredSignalComponents {
+  const values = components.rules.map((rule) => rule.value);
+  const bitmask = components.rules.reduce(
+    (mask, rule, index) => (rule.evaluable ? mask | (1 << index) : mask),
+    0,
+  );
+  return { v: values, e: bitmask };
 }
