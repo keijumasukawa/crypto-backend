@@ -1,0 +1,34 @@
+name: Backfill Market Data
+
+on:
+  workflow_dispatch:
+
+concurrency:
+  group: db-write
+  queue: max
+
+jobs:
+  backfill:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      max-parallel: 4
+      matrix:
+        symbol: [BTCUSDT, ETHUSDT, XRPUSDT, BNBUSDT, SOLUSDT, DOGEUSDT]
+        interval: [1h, 4h, 1d]
+    steps:
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: package.json
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --filter db run generate
+        env:
+          DIRECT_URL: ${{ secrets.DIRECT_URL }}
+      - run: pnpm --filter batch run backfill
+        env:
+          DIRECT_URL: ${{ secrets.DIRECT_URL }}
+          SYMBOL: ${{ matrix.symbol }}
+          INTERVAL: ${{ matrix.interval }}
