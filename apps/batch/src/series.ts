@@ -36,6 +36,15 @@ export function validateKlineInterval(
   return interval;
 }
 
+export function parseOpenTime(value: string | undefined): bigint {
+  if (value === undefined || !/^\d+$/.test(value)) {
+    throw new Error(
+      "開始時点の指定が正しくありません。ミリ秒のエポック時刻を指定してください。",
+    );
+  }
+  return BigInt(value);
+}
+
 export async function updateSeries(
   db: PrismaClient,
   binance: BinanceClient,

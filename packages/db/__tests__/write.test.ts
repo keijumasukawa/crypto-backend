@@ -1,6 +1,8 @@
 import { describe, expect, it } from "vitest";
-import type { Prisma } from "../generated/prisma/client.ts";
+import type { Prisma, PrismaClient } from "../generated/prisma/client.ts";
 import {
+  deleteIndicatorValuesFrom,
+  deleteSignalsFrom,
   updateIndicatorValues,
   updateKlines,
   updateSignals,
@@ -153,5 +155,45 @@ describe("updateSignals", () => {
     await updateSignals(executorStub, [buildSignalRow(0)]);
 
     expect(queries[0]?.values).toContain('{"maTrend":{"result":1,"weight":1}}');
+  });
+});
+
+describe("deleteSignalsFrom", () => {
+  it("系列と openTime 以上を条件に削除する", async () => {
+    let capturedArgs: unknown;
+    const db = {
+      signal: {
+        deleteMany: (args: unknown) => {
+          capturedArgs = args;
+          return Promise.resolve({ count: 0 });
+        },
+      },
+    } as unknown as PrismaClient;
+
+    await deleteSignalsFrom(db, "BTCUSDT", "1d", 1000n);
+
+    expect(capturedArgs).toMatchObject({
+      where: { symbol: "BTCUSDT", interval: "1d", openTime: { gte: 1000n } },
+    });
+  });
+});
+
+describe("deleteIndicatorValuesFrom", () => {
+  it("系列と openTime 以上を条件に削除する", async () => {
+    let capturedArgs: unknown;
+    const db = {
+      indicatorValue: {
+        deleteMany: (args: unknown) => {
+          capturedArgs = args;
+          return Promise.resolve({ count: 0 });
+        },
+      },
+    } as unknown as PrismaClient;
+
+    await deleteIndicatorValuesFrom(db, "BTCUSDT", "1d", 1000n);
+
+    expect(capturedArgs).toMatchObject({
+      where: { symbol: "BTCUSDT", interval: "1d", openTime: { gte: 1000n } },
+    });
   });
 });

@@ -6,6 +6,7 @@
   "scripts": {
     "backfill": "tsx src/backfill-entry.ts",
     "hourly": "tsx src/hourly-entry.ts",
+    "recompute": "tsx src/recompute-entry.ts",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
