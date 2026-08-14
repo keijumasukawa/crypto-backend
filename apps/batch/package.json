@@ -4,6 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "backfill": "tsx src/backfill-entry.ts",
     "hourly": "tsx src/hourly-entry.ts",
     "typecheck": "tsc --noEmit"
   },
