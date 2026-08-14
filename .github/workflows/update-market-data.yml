@@ -1,0 +1,28 @@
+name: Update Market Data
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "5 * * * *"
+
+concurrency:
+  group: db-write
+  queue: max
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: package.json
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --filter db run generate
+        env:
+          DIRECT_URL: ${{ secrets.DIRECT_URL }}
+      - run: pnpm --filter batch run hourly
+        env:
+          DIRECT_URL: ${{ secrets.DIRECT_URL }}
