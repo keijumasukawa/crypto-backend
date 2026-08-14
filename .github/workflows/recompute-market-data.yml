@@ -1,0 +1,44 @@
+name: Recompute Market Data
+
+on:
+  workflow_dispatch:
+    inputs:
+      symbol:
+        description: 対象の銘柄
+        required: true
+        type: choice
+        options: [BTCUSDT, ETHUSDT, XRPUSDT, BNBUSDT, SOLUSDT, DOGEUSDT]
+      interval:
+        description: 対象のインターバル
+        required: true
+        type: choice
+        options: [1h, 4h, 1d]
+      open_time:
+        description: 再計算の開始時点(ミリ秒のエポック時刻)
+        required: true
+        type: string
+
+concurrency:
+  group: db-write
+  queue: max
+
+jobs:
+  recompute:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: package.json
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --filter db run generate
+        env:
+          DIRECT_URL: ${{ secrets.DIRECT_URL }}
+      - run: pnpm --filter batch run recompute
+        env:
+          DIRECT_URL: ${{ secrets.DIRECT_URL }}
+          SYMBOL: ${{ inputs.symbol }}
+          INTERVAL: ${{ inputs.interval }}
+          OPEN_TIME: ${{ inputs.open_time }}
