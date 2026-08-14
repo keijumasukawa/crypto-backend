@@ -1,0 +1,20 @@
+name: Keep Workflows Alive
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 0 1 * *"
+
+permissions:
+  actions: write
+
+jobs:
+  enable-workflows:
+    runs-on: ubuntu-latest
+    steps:
+      - run: gh workflow enable update-market-data.yml --repo ${{ github.repository }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+      - run: gh workflow enable keep-workflows-alive.yml --repo ${{ github.repository }}
+        env:
+          GH_TOKEN: ${{ github.token }}
