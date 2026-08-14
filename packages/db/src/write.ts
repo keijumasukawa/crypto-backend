@@ -1,4 +1,4 @@
-import { Prisma } from "../generated/prisma/client.ts";
+import { Prisma, type PrismaClient } from "../generated/prisma/client.ts";
 
 export type SqlExecutor = {
   $executeRaw: (query: Prisma.Sql) => Promise<number>;
@@ -144,4 +144,26 @@ export async function updateSignals(
         generated_at = EXCLUDED.generated_at
     `);
   }
+}
+
+export async function deleteSignalsFrom(
+  db: PrismaClient,
+  symbol: string,
+  interval: string,
+  openTime: bigint,
+): Promise<void> {
+  await db.signal.deleteMany({
+    where: { symbol, interval, openTime: { gte: openTime } },
+  });
+}
+
+export async function deleteIndicatorValuesFrom(
+  db: PrismaClient,
+  symbol: string,
+  interval: string,
+  openTime: bigint,
+): Promise<void> {
+  await db.indicatorValue.deleteMany({
+    where: { symbol, interval, openTime: { gte: openTime } },
+  });
 }
