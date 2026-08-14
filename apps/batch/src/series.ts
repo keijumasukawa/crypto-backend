@@ -11,7 +11,11 @@ import {
   updateSignals,
   type PrismaClient,
 } from "db";
-import { type BinanceClient, type KlineInterval } from "./binance.ts";
+import {
+  KLINE_INTERVALS,
+  type BinanceClient,
+  type KlineInterval,
+} from "./binance.ts";
 import { buildIndicatorValueRows } from "./indicator-rows.ts";
 import { buildKlineRows } from "./kline-rows.ts";
 import { buildSignalRows } from "./signal-rows.ts";
@@ -19,6 +23,18 @@ import { buildSignalRows } from "./signal-rows.ts";
 const COMPUTE_LOOKBACK_COUNT = 199;
 const SIGNAL_LOOKBACK_COUNT = 1;
 const BACKFILL_START_TIME = 0n;
+
+export function validateKlineInterval(
+  value: string | undefined,
+): KlineInterval {
+  const interval = KLINE_INTERVALS.find((candidate) => candidate === value);
+  if (interval === undefined) {
+    throw new Error(
+      "インターバルの指定が正しくありません。1h・4h・1d のいずれかを指定してください。",
+    );
+  }
+  return interval;
+}
 
 export async function updateSeries(
   db: PrismaClient,
