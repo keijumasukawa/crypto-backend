@@ -10,7 +10,9 @@ export function calculateMacd(
   previousState?: MacdState,
 ): MacdValue[] {
   if (shortPeriod >= longPeriod) {
-    throw new Error("shortPeriod は longPeriod より小さくする");
+    throw new Error(
+      "shortPeriod は longPeriod より小さい値を指定してください。",
+    );
   }
 
   const shortEmas = calculateEma(closes, shortPeriod, previousState?.shortEma);
