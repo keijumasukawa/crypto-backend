@@ -1,11 +1,11 @@
 import { describe, expect, it } from "vitest";
 import { Decimal } from "../src/decimal.ts";
 import { calculateEma } from "../src/ema.ts";
-import { buildFixtureCloses, convertToDecimals } from "./helpers.ts";
-
-function convertToStrings(values: (Decimal | null)[]): (string | null)[] {
-  return values.map((value) => (value === null ? null : value.toString()));
-}
+import {
+  buildFixtureCloses,
+  convertToDecimals,
+  convertToStrings,
+} from "./helpers.ts";
 
 describe("calculateEma", () => {
   it("既知データと一致する(期間 3・平滑係数 0.5)", () => {

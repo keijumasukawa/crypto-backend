@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { Decimal, roundDecimal } from "../src/decimal.ts";
+import { convertToDecimal, Decimal, roundDecimal } from "../src/decimal.ts";
 
 describe("roundDecimal", () => {
   it("小数 10 桁を超える値を 10 桁に丸める", () => {
@@ -54,5 +54,12 @@ describe("Decimal", () => {
     expect(value.plus("0.0000000001").toFixed(10)).toBe(
       "100000000000000000000.0000000000",
     );
+  });
+});
+
+describe("convertToDecimal", () => {
+  it("文字列を Decimal に変換し、null は null のまま返す", () => {
+    expect(convertToDecimal("1.5")?.toString()).toBe("1.5");
+    expect(convertToDecimal(null)).toBeNull();
   });
 });

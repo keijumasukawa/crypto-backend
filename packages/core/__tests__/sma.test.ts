@@ -1,11 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { Decimal } from "../src/decimal.ts";
 import { calculateSma } from "../src/sma.ts";
-import { buildFixtureCloses, convertToDecimals } from "./helpers.ts";
-
-function convertToStrings(values: (Decimal | null)[]): (string | null)[] {
-  return values.map((value) => (value === null ? null : value.toString()));
-}
+import {
+  buildFixtureCloses,
+  convertToDecimals,
+  convertToStrings,
+} from "./helpers.ts";
 
 describe("calculateSma", () => {
   it("既知データと一致する(期間 3)", () => {
