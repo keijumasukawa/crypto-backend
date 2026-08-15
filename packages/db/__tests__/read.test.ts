@@ -8,6 +8,7 @@ import {
   getLatestSignalOpenTime,
   listActiveSymbols,
   listIndicatorValuesAfter,
+  listKlines,
   listKlinesAfter,
   listSymbols,
 } from "../src/read.ts";
@@ -175,6 +176,79 @@ describe("listKlinesAfter", () => {
     const rows = await listKlinesAfter(db, "BTCUSDT", "1d", null, 0);
 
     expect(rows[0]?.close).toBe("1.2345678901");
+  });
+});
+
+describe("listKlines", () => {
+  it("期間指定がない場合は最新側から limit 件を取得し昇順で返す", async () => {
+    let capturedArgs: unknown;
+    const db = {
+      kline: {
+        findMany: (args: unknown) => {
+          capturedArgs = args;
+          return Promise.resolve([
+            buildKlineRecord(1200),
+            buildKlineRecord(1100),
+          ]);
+        },
+      },
+    } as unknown as PrismaClient;
+
+    const rows = await listKlines(db, "BTCUSDT", "1d", null, null, 2);
+
+    expect(rows.map((row) => row.openTime)).toEqual([1100n, 1200n]);
+    expect(capturedArgs).toMatchObject({
+      where: { symbol: "BTCUSDT", interval: "1d" },
+      orderBy: { openTime: "desc" },
+      take: 2,
+    });
+  });
+
+  it("期間指定がある場合は範囲を昇順で走査し先頭から limit 件を返す", async () => {
+    let capturedArgs: unknown;
+    const db = {
+      kline: {
+        findMany: (args: unknown) => {
+          capturedArgs = args;
+          return Promise.resolve([
+            buildKlineRecord(1000),
+            buildKlineRecord(1100),
+          ]);
+        },
+      },
+    } as unknown as PrismaClient;
+
+    const rows = await listKlines(db, "BTCUSDT", "1d", 1000n, 2000n, 100);
+
+    expect(rows.map((row) => row.openTime)).toEqual([1000n, 1100n]);
+    expect(capturedArgs).toMatchObject({
+      where: {
+        symbol: "BTCUSDT",
+        interval: "1d",
+        openTime: { gte: 1000n, lte: 2000n },
+      },
+      orderBy: { openTime: "asc" },
+      take: 100,
+    });
+  });
+
+  it("片側のみの期間指定はその境界だけを条件に含める", async () => {
+    let capturedArgs: unknown;
+    const db = {
+      kline: {
+        findMany: (args: unknown) => {
+          capturedArgs = args;
+          return Promise.resolve([]);
+        },
+      },
+    } as unknown as PrismaClient;
+
+    await listKlines(db, "BTCUSDT", "1d", 1000n, null, 100);
+
+    expect(capturedArgs).toMatchObject({
+      where: { symbol: "BTCUSDT", interval: "1d", openTime: { gte: 1000n } },
+      orderBy: { openTime: "asc" },
+    });
   });
 });
 

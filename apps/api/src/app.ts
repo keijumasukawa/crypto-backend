@@ -1,8 +1,12 @@
 import { KLINE_INTERVALS } from "core";
-import { getLatestKlineCloseTime, listSymbols } from "db";
+import { getLatestKlineCloseTime, listKlines, listSymbols } from "db";
 import { Hono } from "hono";
 import { createApiKeyAuth } from "./auth.ts";
-import { convertToSymbolResponse } from "./serialize.ts";
+import { parseSeriesQuery } from "./query.ts";
+import {
+  convertToKlineResponse,
+  convertToSymbolResponse,
+} from "./serialize.ts";
 import type { ApiDependencies } from "./types.ts";
 
 const STALE_THRESHOLD_MILLISECONDS = 2 * 60 * 60 * 1000;
@@ -33,6 +37,23 @@ export function createApp(dependencies: ApiDependencies): Hono {
   app.get("/api/symbols", async (c) => {
     const symbols = await listSymbols(db);
     return c.json(symbols.map(convertToSymbolResponse));
+  });
+
+  app.get("/api/klines", async (c) => {
+    const result = parseSeriesQuery(c.req.query());
+    if (!result.isValid) {
+      return c.json({ message: result.message }, 400);
+    }
+    const { symbol, interval, startTime, endTime, limit } = result.query;
+    const klines = await listKlines(
+      db,
+      symbol,
+      interval,
+      startTime,
+      endTime,
+      limit,
+    );
+    return c.json(klines.map(convertToKlineResponse));
   });
 
   return app;

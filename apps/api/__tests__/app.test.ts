@@ -1,9 +1,15 @@
-import { getLatestKlineCloseTime, listSymbols, type PrismaClient } from "db";
+import {
+  getLatestKlineCloseTime,
+  listKlines,
+  listSymbols,
+  type PrismaClient,
+} from "db";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { createApp } from "../src/app.ts";
 
 vi.mock("db", () => ({
   getLatestKlineCloseTime: vi.fn(),
+  listKlines: vi.fn(),
   listSymbols: vi.fn(),
 }));
 
@@ -154,6 +160,76 @@ describe("GET /api/symbols", () => {
 
   it("キーなしは 401 になる", async () => {
     const response = await buildApp().request("/api/symbols");
+
+    expect(response.status).toBe(401);
+  });
+});
+
+describe("GET /api/klines", () => {
+  it("認証済みでローソク足一覧をシリアライズ規約どおり返す", async () => {
+    vi.mocked(listKlines).mockResolvedValue([
+      {
+        symbol: "BTCUSDT",
+        interval: "1h",
+        openTime: 1_700_000_000_000n,
+        open: "100",
+        high: "110.5",
+        low: "99",
+        close: "105.25",
+        volume: "12.5",
+        closeTime: 1_700_003_599_999n,
+        quoteAssetVolume: "1300",
+        numberOfTrades: 42,
+        takerBuyBaseAssetVolume: "6",
+        takerBuyQuoteAssetVolume: "630",
+      },
+    ]);
+
+    const response = await buildApp().request(
+      "/api/klines?symbol=BTCUSDT&interval=1h",
+      { headers: { "x-api-key": API_KEY } },
+    );
+
+    expect(response.status).toBe(200);
+    expect(await response.json()).toEqual([
+      {
+        symbol: "BTCUSDT",
+        interval: "1h",
+        openTime: 1_700_000_000_000,
+        open: "100.0000000000",
+        high: "110.5000000000",
+        low: "99.0000000000",
+        close: "105.2500000000",
+        volume: "12.5000000000",
+        closeTime: 1_700_003_599_999,
+        quoteAssetVolume: "1300.0000000000",
+        numberOfTrades: 42,
+        takerBuyBaseAssetVolume: "6.0000000000",
+        takerBuyQuoteAssetVolume: "630.0000000000",
+      },
+    ]);
+    expect(vi.mocked(listKlines)).toHaveBeenCalledWith(
+      dbStub,
+      "BTCUSDT",
+      "1h",
+      null,
+      null,
+      100,
+    );
+  });
+
+  it("不正なクエリは 400 になる", async () => {
+    const response = await buildApp().request("/api/klines?symbol=BTCUSDT", {
+      headers: { "x-api-key": API_KEY },
+    });
+
+    expect(response.status).toBe(400);
+  });
+
+  it("キーなしは 401 になる", async () => {
+    const response = await buildApp().request(
+      "/api/klines?symbol=BTCUSDT&interval=1h",
+    );
 
     expect(response.status).toBe(401);
   });

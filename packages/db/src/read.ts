@@ -132,6 +132,38 @@ export async function listKlinesAfter(
   return [...lookbackRecords.reverse(), ...newRecords].map(convertToKlineRow);
 }
 
+export async function listKlines(
+  db: PrismaClient,
+  symbol: string,
+  interval: string,
+  startTime: bigint | null,
+  endTime: bigint | null,
+  limit: number,
+): Promise<KlineRow[]> {
+  if (startTime === null && endTime === null) {
+    const records = await db.kline.findMany({
+      where: { symbol, interval },
+      orderBy: { openTime: "desc" },
+      take: limit,
+    });
+    return records.reverse().map(convertToKlineRow);
+  }
+
+  const records = await db.kline.findMany({
+    where: {
+      symbol,
+      interval,
+      openTime: {
+        ...(startTime === null ? {} : { gte: startTime }),
+        ...(endTime === null ? {} : { lte: endTime }),
+      },
+    },
+    orderBy: { openTime: "asc" },
+    take: limit,
+  });
+  return records.map(convertToKlineRow);
+}
+
 export async function getLatestIndicatorValueOpenTime(
   db: PrismaClient,
   symbol: string,
