@@ -1,5 +1,5 @@
 import type { PrismaClient } from "../generated/prisma/client.ts";
-import type { IndicatorValueRow, KlineRow } from "./write.ts";
+import type { IndicatorValueRow, KlineRow } from "./types.ts";
 
 type KlineRecord = {
   symbol: string;

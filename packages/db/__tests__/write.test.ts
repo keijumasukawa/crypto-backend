@@ -1,14 +1,12 @@
 import { describe, expect, it } from "vitest";
 import type { Prisma, PrismaClient } from "../generated/prisma/client.ts";
+import type { IndicatorValueRow, KlineRow, SignalRow } from "../src/types.ts";
 import {
   deleteIndicatorValuesFrom,
   deleteSignalsFrom,
   updateIndicatorValues,
   updateKlines,
   updateSignals,
-  type IndicatorValueRow,
-  type KlineRow,
-  type SignalRow,
 } from "../src/write.ts";
 
 function buildExecutorStub() {

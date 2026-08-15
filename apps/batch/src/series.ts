@@ -11,11 +11,8 @@ import {
   updateSignals,
   type PrismaClient,
 } from "db";
-import {
-  KLINE_INTERVALS,
-  type BinanceClient,
-  type KlineInterval,
-} from "./binance.ts";
+import { KLINE_INTERVALS, type KlineInterval } from "core";
+import type { BinanceClient } from "./types.ts";
 import { buildIndicatorValueRows } from "./indicator-rows.ts";
 import { buildKlineRows } from "./kline-rows.ts";
 import { buildSignalRows } from "./signal-rows.ts";

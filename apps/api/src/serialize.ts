@@ -1,5 +1,11 @@
 import { Decimal, DECIMAL_PLACES } from "core";
-import type { IndicatorValueRow, KlineRow, SignalRow } from "db";
+import type { IndicatorValueRow, KlineRow, SignalRow, SymbolRecord } from "db";
+import type {
+  IndicatorValueResponse,
+  KlineResponse,
+  SignalResponse,
+  SymbolResponse,
+} from "./types.ts";
 
 export function formatDecimal(value: string): string {
   return new Decimal(value).toFixed(DECIMAL_PLACES);
@@ -8,22 +14,6 @@ export function formatDecimal(value: string): string {
 function formatNullableDecimal(value: string | null): string | null {
   return value === null ? null : formatDecimal(value);
 }
-
-export type KlineResponse = {
-  symbol: string;
-  interval: string;
-  openTime: number;
-  open: string;
-  high: string;
-  low: string;
-  close: string;
-  volume: string;
-  closeTime: number;
-  quoteAssetVolume: string;
-  numberOfTrades: number;
-  takerBuyBaseAssetVolume: string;
-  takerBuyQuoteAssetVolume: string;
-};
 
 export function convertToKlineResponse(row: KlineRow): KlineResponse {
   return {
@@ -42,24 +32,6 @@ export function convertToKlineResponse(row: KlineRow): KlineResponse {
     takerBuyQuoteAssetVolume: formatDecimal(row.takerBuyQuoteAssetVolume),
   };
 }
-
-export type IndicatorValueResponse = {
-  symbol: string;
-  interval: string;
-  openTime: number;
-  sma20: string | null;
-  sma50: string | null;
-  sma200: string | null;
-  ema12: string | null;
-  ema26: string | null;
-  rsi14: string | null;
-  macd: string | null;
-  macdSignal: string | null;
-  macdHist: string | null;
-  bbUpper: string | null;
-  bbMiddle: string | null;
-  bbLower: string | null;
-};
 
 export function convertToIndicatorValueResponse(
   row: IndicatorValueRow,
@@ -83,22 +55,6 @@ export function convertToIndicatorValueResponse(
   };
 }
 
-export type SymbolRecord = {
-  symbol: string;
-  baseAsset: string;
-  quoteAsset: string;
-  onboardDate: Date;
-  isActive: boolean;
-};
-
-export type SymbolResponse = {
-  symbol: string;
-  baseAsset: string;
-  quoteAsset: string;
-  onboardDate: string;
-  isActive: boolean;
-};
-
 export function convertToSymbolResponse(record: SymbolRecord): SymbolResponse {
   return {
     symbol: record.symbol,
@@ -108,17 +64,6 @@ export function convertToSymbolResponse(record: SymbolRecord): SymbolResponse {
     isActive: record.isActive,
   };
 }
-
-export type SignalResponse = {
-  symbol: string;
-  interval: string;
-  openTime: number;
-  logicVersion: string;
-  direction: string;
-  score: string;
-  components: unknown;
-  generatedAt: string;
-};
 
 export function convertToSignalResponse(row: SignalRow): SignalResponse {
   return {

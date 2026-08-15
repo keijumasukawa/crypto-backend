@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import type { Kline } from "../src/binance.ts";
+import type { Kline } from "../src/types.ts";
 import { buildKlineRows } from "../src/kline-rows.ts";
 
 function buildKline(openTime: number): Kline {
