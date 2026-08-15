@@ -182,6 +182,18 @@ export async function listIndicatorValuesAfter(
   );
 }
 
+export async function getLatestKlineCloseTime(
+  db: PrismaClient,
+  interval: string,
+): Promise<bigint | null> {
+  const kline = await db.kline.findFirst({
+    where: { interval },
+    orderBy: { closeTime: "desc" },
+    select: { closeTime: true },
+  });
+  return kline?.closeTime ?? null;
+}
+
 export async function getLatestSignalOpenTime(
   db: PrismaClient,
   symbol: string,

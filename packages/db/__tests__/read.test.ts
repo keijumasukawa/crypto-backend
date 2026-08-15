@@ -3,6 +3,7 @@ import type { PrismaClient } from "../generated/prisma/client.ts";
 import {
   getIndicatorValueRow,
   getLatestIndicatorValueOpenTime,
+  getLatestKlineCloseTime,
   getLatestKlineOpenTime,
   getLatestSignalOpenTime,
   listActiveSymbols,
@@ -268,6 +269,32 @@ describe("getLatestSignalOpenTime", () => {
     expect(capturedArgs).toMatchObject({
       where: { symbol: "BTCUSDT", interval: "1d", logicVersion: "rule-v1" },
       orderBy: { openTime: "desc" },
+    });
+  });
+});
+
+describe("getLatestKlineCloseTime", () => {
+  it("インターバル全体の最新 closeTime を返し、空の場合は null を返す", async () => {
+    let capturedArgs: unknown;
+    const db = {
+      kline: {
+        findFirst: (args: unknown) => {
+          capturedArgs = args;
+          return Promise.resolve({ closeTime: 4999n });
+        },
+      },
+    } as unknown as PrismaClient;
+    const emptyDb = {
+      kline: {
+        findFirst: () => Promise.resolve(null),
+      },
+    } as unknown as PrismaClient;
+
+    expect(await getLatestKlineCloseTime(db, "1h")).toBe(4999n);
+    expect(await getLatestKlineCloseTime(emptyDb, "1h")).toBeNull();
+    expect(capturedArgs).toMatchObject({
+      where: { interval: "1h" },
+      orderBy: { closeTime: "desc" },
     });
   });
 });
