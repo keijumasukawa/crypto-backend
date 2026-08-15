@@ -7,6 +7,7 @@ import {
   getLatestKlineOpenTime,
   getLatestSignalOpenTime,
   listActiveSymbols,
+  listIndicatorValues,
   listIndicatorValuesAfter,
   listKlines,
   listKlinesAfter,
@@ -318,6 +319,86 @@ describe("listIndicatorValuesAfter", () => {
     const rows = await listIndicatorValuesAfter(db, "BTCUSDT", "1d", 1000n, 1);
 
     expect(rows.map((row) => row.openTime)).toEqual([900n, 1100n]);
+  });
+});
+
+describe("listIndicatorValues", () => {
+  it("期間指定がない場合は最新側から limit 件を取得し昇順で返す", async () => {
+    let capturedArgs: unknown;
+    const db = {
+      indicatorValue: {
+        findMany: (args: unknown) => {
+          capturedArgs = args;
+          return Promise.resolve([
+            buildIndicatorValueRecord(1200),
+            buildIndicatorValueRecord(1100),
+          ]);
+        },
+      },
+    } as unknown as PrismaClient;
+
+    const rows = await listIndicatorValues(db, "BTCUSDT", "1d", null, null, 2);
+
+    expect(rows.map((row) => row.openTime)).toEqual([1100n, 1200n]);
+    expect(capturedArgs).toMatchObject({
+      where: { symbol: "BTCUSDT", interval: "1d" },
+      orderBy: { openTime: "desc" },
+      take: 2,
+    });
+  });
+
+  it("期間指定がある場合は範囲を昇順で走査し先頭から limit 件を返す", async () => {
+    let capturedArgs: unknown;
+    const db = {
+      indicatorValue: {
+        findMany: (args: unknown) => {
+          capturedArgs = args;
+          return Promise.resolve([
+            buildIndicatorValueRecord(1000),
+            buildIndicatorValueRecord(1100),
+          ]);
+        },
+      },
+    } as unknown as PrismaClient;
+
+    const rows = await listIndicatorValues(
+      db,
+      "BTCUSDT",
+      "1d",
+      1000n,
+      2000n,
+      100,
+    );
+
+    expect(rows.map((row) => row.openTime)).toEqual([1000n, 1100n]);
+    expect(capturedArgs).toMatchObject({
+      where: {
+        symbol: "BTCUSDT",
+        interval: "1d",
+        openTime: { gte: 1000n, lte: 2000n },
+      },
+      orderBy: { openTime: "asc" },
+      take: 100,
+    });
+  });
+
+  it("片側のみの期間指定はその境界だけを条件に含める", async () => {
+    let capturedArgs: unknown;
+    const db = {
+      indicatorValue: {
+        findMany: (args: unknown) => {
+          capturedArgs = args;
+          return Promise.resolve([]);
+        },
+      },
+    } as unknown as PrismaClient;
+
+    await listIndicatorValues(db, "BTCUSDT", "1d", 1000n, null, 100);
+
+    expect(capturedArgs).toMatchObject({
+      where: { symbol: "BTCUSDT", interval: "1d", openTime: { gte: 1000n } },
+      orderBy: { openTime: "asc" },
+    });
   });
 });
 

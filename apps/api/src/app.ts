@@ -1,9 +1,15 @@
 import { KLINE_INTERVALS } from "core";
-import { getLatestKlineCloseTime, listKlines, listSymbols } from "db";
+import {
+  getLatestKlineCloseTime,
+  listIndicatorValues,
+  listKlines,
+  listSymbols,
+} from "db";
 import { Hono } from "hono";
 import { createApiKeyAuth } from "./auth.ts";
 import { parseSeriesQuery } from "./query.ts";
 import {
+  convertToIndicatorValueResponse,
   convertToKlineResponse,
   convertToSymbolResponse,
 } from "./serialize.ts";
@@ -54,6 +60,23 @@ export function createApp(dependencies: ApiDependencies): Hono {
       limit,
     );
     return c.json(klines.map(convertToKlineResponse));
+  });
+
+  app.get("/api/indicator-values", async (c) => {
+    const result = parseSeriesQuery(c.req.query());
+    if (!result.isValid) {
+      return c.json({ message: result.message }, 400);
+    }
+    const { symbol, interval, startTime, endTime, limit } = result.query;
+    const indicatorValues = await listIndicatorValues(
+      db,
+      symbol,
+      interval,
+      startTime,
+      endTime,
+      limit,
+    );
+    return c.json(indicatorValues.map(convertToIndicatorValueResponse));
   });
 
   return app;
