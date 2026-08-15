@@ -218,6 +218,38 @@ export async function listIndicatorValuesAfter(
   );
 }
 
+export async function listIndicatorValues(
+  db: PrismaClient,
+  symbol: string,
+  interval: string,
+  startTime: bigint | null,
+  endTime: bigint | null,
+  limit: number,
+): Promise<IndicatorValueRow[]> {
+  if (startTime === null && endTime === null) {
+    const records = await db.indicatorValue.findMany({
+      where: { symbol, interval },
+      orderBy: { openTime: "desc" },
+      take: limit,
+    });
+    return records.reverse().map(convertToIndicatorValueRow);
+  }
+
+  const records = await db.indicatorValue.findMany({
+    where: {
+      symbol,
+      interval,
+      openTime: {
+        ...(startTime === null ? {} : { gte: startTime }),
+        ...(endTime === null ? {} : { lte: endTime }),
+      },
+    },
+    orderBy: { openTime: "asc" },
+    take: limit,
+  });
+  return records.map(convertToIndicatorValueRow);
+}
+
 export async function getLatestKlineCloseTime(
   db: PrismaClient,
   interval: string,
