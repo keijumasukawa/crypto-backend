@@ -9,6 +9,7 @@ import {
   listActiveSymbols,
   listIndicatorValuesAfter,
   listKlinesAfter,
+  listSymbols,
 } from "../src/read.ts";
 
 function buildKlineRecord(openTime: number) {
@@ -270,6 +271,32 @@ describe("getLatestSignalOpenTime", () => {
       where: { symbol: "BTCUSDT", interval: "1d", logicVersion: "rule-v1" },
       orderBy: { openTime: "desc" },
     });
+  });
+});
+
+describe("listSymbols", () => {
+  it("全銘柄を銘柄順で返す", async () => {
+    let capturedArgs: unknown;
+    const records = [
+      {
+        symbol: "BNBUSDT",
+        baseAsset: "BNB",
+        quoteAsset: "USDT",
+        onboardDate: new Date("2017-11-06T00:00:00.000Z"),
+        isActive: true,
+      },
+    ];
+    const db = {
+      symbol: {
+        findMany: (args: unknown) => {
+          capturedArgs = args;
+          return Promise.resolve(records);
+        },
+      },
+    } as unknown as PrismaClient;
+
+    expect(await listSymbols(db)).toEqual(records);
+    expect(capturedArgs).toMatchObject({ orderBy: { symbol: "asc" } });
   });
 });
 
