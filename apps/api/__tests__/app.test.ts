@@ -1,9 +1,10 @@
-import { getLatestKlineCloseTime, type PrismaClient } from "db";
+import { getLatestKlineCloseTime, listSymbols, type PrismaClient } from "db";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { createApp } from "../src/app.ts";
 
 vi.mock("db", () => ({
   getLatestKlineCloseTime: vi.fn(),
+  listSymbols: vi.fn(),
 }));
 
 const NOW = 1_786_500_000_000;
@@ -120,5 +121,40 @@ describe("API キー認証", () => {
 
     expect(response.status).toBe(200);
     expect(await response.json()).toEqual({ ok: true });
+  });
+});
+
+describe("GET /api/symbols", () => {
+  it("認証済みで銘柄一覧をシリアライズ規約どおり返す", async () => {
+    vi.mocked(listSymbols).mockResolvedValue([
+      {
+        symbol: "BNBUSDT",
+        baseAsset: "BNB",
+        quoteAsset: "USDT",
+        onboardDate: new Date("2017-11-06T00:00:00.000Z"),
+        isActive: true,
+      },
+    ]);
+
+    const response = await buildApp().request("/api/symbols", {
+      headers: { "x-api-key": API_KEY },
+    });
+
+    expect(response.status).toBe(200);
+    expect(await response.json()).toEqual([
+      {
+        symbol: "BNBUSDT",
+        baseAsset: "BNB",
+        quoteAsset: "USDT",
+        onboardDate: "2017-11-06T00:00:00.000Z",
+        isActive: true,
+      },
+    ]);
+  });
+
+  it("キーなしは 401 になる", async () => {
+    const response = await buildApp().request("/api/symbols");
+
+    expect(response.status).toBe(401);
   });
 });

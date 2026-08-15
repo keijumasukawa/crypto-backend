@@ -1,5 +1,5 @@
 import type { PrismaClient } from "../generated/prisma/client.ts";
-import type { IndicatorValueRow, KlineRow } from "./types.ts";
+import type { IndicatorValueRow, KlineRow, SymbolRecord } from "./types.ts";
 
 type KlineRecord = {
   symbol: string;
@@ -86,6 +86,10 @@ export async function listActiveSymbols(db: PrismaClient): Promise<string[]> {
     select: { symbol: true },
   });
   return symbols.map((record) => record.symbol);
+}
+
+export async function listSymbols(db: PrismaClient): Promise<SymbolRecord[]> {
+  return db.symbol.findMany({ orderBy: { symbol: "asc" } });
 }
 
 export async function getLatestKlineOpenTime(
