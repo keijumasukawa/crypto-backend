@@ -1,5 +1,6 @@
 import { getLatestKlineCloseTime, type PrismaClient } from "db";
 import { Hono } from "hono";
+import { createApiKeyAuth } from "./auth.ts";
 
 const STALE_THRESHOLD_MILLISECONDS = 2 * 60 * 60 * 1000;
 const HEALTH_INTERVALS = ["1h", "4h", "1d"] as const;
@@ -7,10 +8,11 @@ const HEALTH_INTERVALS = ["1h", "4h", "1d"] as const;
 export type ApiDependencies = {
   db: PrismaClient;
   now: () => number;
+  apiKey: string;
 };
 
 export function createApp(dependencies: ApiDependencies): Hono {
-  const { db, now } = dependencies;
+  const { db, now, apiKey } = dependencies;
   const app = new Hono();
 
   app.get("/api/health", async (c) => {
@@ -29,6 +31,8 @@ export function createApp(dependencies: ApiDependencies): Hono {
         : "stale";
     return c.json({ status, latestDataAt, serverTime });
   });
+
+  app.use("/api/*", createApiKeyAuth(apiKey));
 
   return app;
 }
