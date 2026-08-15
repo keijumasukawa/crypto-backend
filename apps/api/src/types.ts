@@ -28,6 +28,15 @@ export type SignalQuery = {
 export type SignalQueryResult =
   { isValid: true; query: SignalQuery } | { isValid: false; message: string };
 
+export type LatestSignalQuery = {
+  interval: KlineInterval;
+  logicVersion: string;
+};
+
+export type LatestSignalQueryResult =
+  | { isValid: true; query: LatestSignalQuery }
+  | { isValid: false; message: string };
+
 export type KlineResponse = {
   symbol: string;
   interval: string;

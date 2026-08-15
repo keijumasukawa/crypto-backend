@@ -319,3 +319,22 @@ export async function listSignals(
   });
   return records.reverse().map(convertToSignalRow);
 }
+
+export async function listLatestSignals(
+  db: PrismaClient,
+  interval: string,
+  logicVersion: string,
+): Promise<SignalRow[]> {
+  const symbols = await listActiveSymbols(db);
+  const rows: SignalRow[] = [];
+  for (const symbol of symbols) {
+    const record = await db.signal.findFirst({
+      where: { symbol, interval, logicVersion },
+      orderBy: { openTime: "desc" },
+    });
+    if (record !== null) {
+      rows.push(convertToSignalRow(record));
+    }
+  }
+  return rows;
+}

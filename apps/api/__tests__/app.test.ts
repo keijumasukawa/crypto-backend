@@ -2,6 +2,7 @@ import {
   getLatestKlineCloseTime,
   listIndicatorValues,
   listKlines,
+  listLatestSignals,
   listSignals,
   listSymbols,
   type PrismaClient,
@@ -13,6 +14,7 @@ vi.mock("db", () => ({
   getLatestKlineCloseTime: vi.fn(),
   listIndicatorValues: vi.fn(),
   listKlines: vi.fn(),
+  listLatestSignals: vi.fn(),
   listSignals: vi.fn(),
   listSymbols: vi.fn(),
 }));
@@ -292,6 +294,65 @@ describe("GET /api/signals", () => {
   it("キーなしは 401 になる", async () => {
     const response = await buildApp().request(
       "/api/signals?symbol=BTCUSDT&interval=1d",
+    );
+
+    expect(response.status).toBe(401);
+  });
+});
+
+describe("GET /api/signals/latest", () => {
+  it("認証済みで全銘柄の最新シグナルをシリアライズ規約どおり返す", async () => {
+    vi.mocked(listLatestSignals).mockResolvedValue([
+      {
+        symbol: "BTCUSDT",
+        interval: "1d",
+        openTime: 1_700_000_000_000n,
+        logicVersion: "rule-v1",
+        direction: "neutral",
+        score: "0.2",
+        components: { v: [1, 0, 0, 0, 0], e: 31 },
+        generatedAt: new Date("2026-08-06T00:00:00.000Z"),
+      },
+    ]);
+
+    const response = await buildApp().request(
+      "/api/signals/latest?interval=1d",
+      {
+        headers: { "x-api-key": API_KEY },
+      },
+    );
+
+    expect(response.status).toBe(200);
+    expect(await response.json()).toEqual([
+      {
+        symbol: "BTCUSDT",
+        interval: "1d",
+        openTime: 1_700_000_000_000,
+        logicVersion: "rule-v1",
+        direction: "neutral",
+        score: "0.2000000000",
+        components: { v: [1, 0, 0, 0, 0], e: 31 },
+        generatedAt: "2026-08-06T00:00:00.000Z",
+      },
+    ]);
+    expect(vi.mocked(listLatestSignals)).toHaveBeenCalledWith(
+      dbStub,
+      "1d",
+      "rule-v1",
+    );
+  });
+
+  it("不正なクエリは 400 になる", async () => {
+    const response = await buildApp().request("/api/signals/latest", {
+      headers: { "x-api-key": API_KEY },
+    });
+
+    expect(response.status).toBe(400);
+  });
+
+  it("キーなしは 401 になる", async () => {
+    const response = await buildApp().request(
+      "/api/signals/latest?interval=1d",
     );
 
     expect(response.status).toBe(401);

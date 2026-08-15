@@ -1,5 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { parseSeriesQuery, parseSignalQuery } from "../src/query.ts";
+import {
+  parseLatestSignalQuery,
+  parseSeriesQuery,
+  parseSignalQuery,
+} from "../src/query.ts";
 
 describe("parseSeriesQuery", () => {
   it("必須のみの指定で既定値を適用する", () => {
@@ -120,5 +124,35 @@ describe("parseSignalQuery", () => {
     expect(
       parseSignalQuery({ symbol: "BTCUSDT", interval: "1h", limit: "1001" }),
     ).toMatchObject({ isValid: false });
+  });
+});
+
+describe("parseLatestSignalQuery", () => {
+  it("interval のみの指定で既定値を適用する", () => {
+    const result = parseLatestSignalQuery({ interval: "1d" });
+
+    expect(result).toEqual({
+      isValid: true,
+      query: { interval: "1d", logicVersion: "rule-v1" },
+    });
+  });
+
+  it("logicVersion を指定できる", () => {
+    const result = parseLatestSignalQuery({
+      interval: "1h",
+      logicVersion: "rule-v2",
+    });
+
+    expect(result).toEqual({
+      isValid: true,
+      query: { interval: "1h", logicVersion: "rule-v2" },
+    });
+  });
+
+  it("interval が不正な場合は無効とする", () => {
+    expect(parseLatestSignalQuery({ interval: "5m" })).toMatchObject({
+      isValid: false,
+    });
+    expect(parseLatestSignalQuery({})).toMatchObject({ isValid: false });
   });
 });

@@ -3,12 +3,17 @@ import {
   getLatestKlineCloseTime,
   listIndicatorValues,
   listKlines,
+  listLatestSignals,
   listSignals,
   listSymbols,
 } from "db";
 import { Hono } from "hono";
 import { createApiKeyAuth } from "./auth.ts";
-import { parseSeriesQuery, parseSignalQuery } from "./query.ts";
+import {
+  parseLatestSignalQuery,
+  parseSeriesQuery,
+  parseSignalQuery,
+} from "./query.ts";
 import {
   convertToIndicatorValueResponse,
   convertToKlineResponse,
@@ -94,6 +99,16 @@ export function createApp(dependencies: ApiDependencies): Hono {
       logicVersion,
       limit,
     );
+    return c.json(signals.map(convertToSignalResponse));
+  });
+
+  app.get("/api/signals/latest", async (c) => {
+    const result = parseLatestSignalQuery(c.req.query());
+    if (!result.isValid) {
+      return c.json({ message: result.message }, 400);
+    }
+    const { interval, logicVersion } = result.query;
+    const signals = await listLatestSignals(db, interval, logicVersion);
     return c.json(signals.map(convertToSignalResponse));
   });
 
