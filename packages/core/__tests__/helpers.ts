@@ -4,6 +4,12 @@ export function convertToDecimals(values: string[]): Decimal[] {
   return values.map((value) => new Decimal(value));
 }
 
+export function convertToStrings(
+  values: (Decimal | null)[],
+): (string | null)[] {
+  return values.map((value) => (value === null ? null : value.toString()));
+}
+
 export function buildFixtureCloses(count: number): Decimal[] {
   const closes: Decimal[] = [];
   let price = new Decimal("100");

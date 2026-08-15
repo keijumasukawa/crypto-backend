@@ -4,6 +4,7 @@ import {
   calculateMacd,
   calculateRsi,
   calculateSma,
+  convertToDecimal,
   Decimal,
   type BollingerBands,
   type MacdState,
@@ -22,10 +23,6 @@ const EMA_SHORT_PERIOD = 12;
 const EMA_LONG_PERIOD = 26;
 const MACD_SIGNAL_PERIOD = 9;
 const RSI_PERIOD = 14;
-
-function convertToDecimal(value: string | null): Decimal | null {
-  return value === null ? null : new Decimal(value);
-}
 
 function buildEmaSeries(
   closes: Decimal[],

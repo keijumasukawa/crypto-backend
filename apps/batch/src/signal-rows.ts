@@ -1,5 +1,6 @@
 import {
   calculateRuleV1Signal,
+  convertToDecimal,
   convertToStoredComponents,
   Decimal,
   RULE_V1_LOGIC_VERSION,
@@ -7,10 +8,6 @@ import {
   type SignalInput,
 } from "core";
 import type { IndicatorValueRow, KlineRow, SignalRow } from "db";
-
-function convertToDecimal(value: string | null): Decimal | null {
-  return value === null ? null : new Decimal(value);
-}
 
 function convertToSignalInput(
   row: IndicatorValueRow,

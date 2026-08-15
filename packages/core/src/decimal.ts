@@ -14,3 +14,7 @@ export type Decimal = InstanceType<typeof Decimal>;
 export function roundDecimal(value: Decimal): Decimal {
   return value.toDecimalPlaces(DECIMAL_PLACES, Decimal.ROUND_HALF_UP);
 }
+
+export function convertToDecimal(value: string | null): Decimal | null {
+  return value === null ? null : new Decimal(value);
+}
