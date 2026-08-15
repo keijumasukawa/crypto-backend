@@ -13,7 +13,7 @@ import {
 } from "db";
 import { KLINE_INTERVALS, type KlineInterval } from "core";
 import type { BinanceClient } from "./types.ts";
-import { buildIndicatorValueRows } from "./indicator-rows.ts";
+import { buildIndicatorValueRows } from "./indicator-value-rows.ts";
 import { buildKlineRows } from "./kline-rows.ts";
 import { buildSignalRows } from "./signal-rows.ts";
 
@@ -61,7 +61,7 @@ export async function updateSeries(
   );
   await updateKlines(db, buildKlineRows(symbol, interval, klines));
 
-  const latestIndicatorOpenTime = await getLatestIndicatorValueOpenTime(
+  const latestIndicatorValueOpenTime = await getLatestIndicatorValueOpenTime(
     db,
     symbol,
     interval,
@@ -70,23 +70,23 @@ export async function updateSeries(
     db,
     symbol,
     interval,
-    latestIndicatorOpenTime,
+    latestIndicatorValueOpenTime,
     COMPUTE_LOOKBACK_COUNT,
   );
   const previousState =
-    latestIndicatorOpenTime === null
+    latestIndicatorValueOpenTime === null
       ? null
       : await getIndicatorValueRow(
           db,
           symbol,
           interval,
-          latestIndicatorOpenTime,
+          latestIndicatorValueOpenTime,
         );
   await updateIndicatorValues(
     db,
     buildIndicatorValueRows(
       computeKlines,
-      latestIndicatorOpenTime,
+      latestIndicatorValueOpenTime,
       previousState,
     ),
   );
