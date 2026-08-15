@@ -3,11 +3,13 @@ import { Decimal } from "../src/decimal.ts";
 import {
   calculateRuleV1Signal,
   convertToStoredComponents,
-  type PreviousSignalInput,
-  type SignalInput,
-  type SignalRule,
-  type SignalRuleId,
 } from "../src/rule-v1.ts";
+import type {
+  PreviousSignalInput,
+  SignalInput,
+  SignalRule,
+  SignalRuleId,
+} from "../src/types.ts";
 
 function buildInput(overrides: Partial<SignalInput> = {}): SignalInput {
   return {

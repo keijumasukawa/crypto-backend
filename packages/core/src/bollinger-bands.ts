@@ -1,10 +1,5 @@
 import { Decimal, roundDecimal } from "./decimal.ts";
-
-export type BollingerBands = {
-  upper: Decimal;
-  middle: Decimal;
-  lower: Decimal;
-};
+import type { BollingerBands } from "./types.ts";
 
 export function calculateBollingerBands(
   closes: Decimal[],

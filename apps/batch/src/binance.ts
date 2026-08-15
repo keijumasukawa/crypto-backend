@@ -1,37 +1,10 @@
+import type { KlineInterval } from "core";
 import { z } from "zod";
-
-export const KLINE_INTERVALS = ["1h", "4h", "1d"] as const;
-
-export type KlineInterval = (typeof KLINE_INTERVALS)[number];
-
-export type Kline = {
-  openTime: bigint;
-  open: string;
-  high: string;
-  low: string;
-  close: string;
-  volume: string;
-  closeTime: bigint;
-  quoteAssetVolume: string;
-  numberOfTrades: number;
-  takerBuyBaseAssetVolume: string;
-  takerBuyQuoteAssetVolume: string;
-};
-
-export type BinanceClient = {
-  listKlines: (
-    symbol: string,
-    interval: KlineInterval,
-    startTime: bigint,
-  ) => Promise<Kline[]>;
-};
-
-export type BinanceClientDependencies = {
-  fetch?: typeof globalThis.fetch;
-  sleep?: (milliseconds: number) => Promise<void>;
-  now?: () => number;
-  baseUrl?: string;
-};
+import type {
+  BinanceClient,
+  BinanceClientDependencies,
+  Kline,
+} from "./types.ts";
 
 const DEFAULT_BASE_URL = "https://data-api.binance.vision";
 const KLINES_PATH = "/api/v3/klines";

@@ -12,8 +12,8 @@ import {
   updateSignals,
 } from "db";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import type { Kline } from "../src/binance.ts";
-import { main, type HourlyDependencies } from "../src/hourly.ts";
+import { main } from "../src/hourly.ts";
+import type { HourlyDependencies, Kline } from "../src/types.ts";
 
 vi.mock("db", () => ({
   listActiveSymbols: vi.fn(),

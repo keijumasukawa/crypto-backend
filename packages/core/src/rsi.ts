@@ -1,16 +1,5 @@
 import { Decimal, roundDecimal } from "./decimal.ts";
-
-export type RsiState = {
-  avgGain: Decimal;
-  avgLoss: Decimal;
-  previousClose: Decimal;
-};
-
-export type RsiValue = {
-  rsi: Decimal;
-  avgGain: Decimal;
-  avgLoss: Decimal;
-};
+import type { RsiState, RsiValue } from "./types.ts";
 
 const MAX_RSI = new Decimal(100);
 const MIN_RSI = new Decimal(0);

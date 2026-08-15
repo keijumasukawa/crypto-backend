@@ -1,15 +1,10 @@
-import { getLatestKlineCloseTime, type PrismaClient } from "db";
+import { KLINE_INTERVALS } from "core";
+import { getLatestKlineCloseTime } from "db";
 import { Hono } from "hono";
 import { createApiKeyAuth } from "./auth.ts";
+import type { ApiDependencies } from "./types.ts";
 
 const STALE_THRESHOLD_MILLISECONDS = 2 * 60 * 60 * 1000;
-const HEALTH_INTERVALS = ["1h", "4h", "1d"] as const;
-
-export type ApiDependencies = {
-  db: PrismaClient;
-  now: () => number;
-  apiKey: string;
-};
 
 export function createApp(dependencies: ApiDependencies): Hono {
   const { db, now, apiKey } = dependencies;
@@ -18,7 +13,7 @@ export function createApp(dependencies: ApiDependencies): Hono {
   app.get("/api/health", async (c) => {
     const serverTime = now();
     const latestDataAt: Record<string, number | null> = {};
-    for (const interval of HEALTH_INTERVALS) {
+    for (const interval of KLINE_INTERVALS) {
       const closeTime = await getLatestKlineCloseTime(db, interval);
       latestDataAt[interval] = closeTime === null ? null : Number(closeTime);
     }

@@ -1,8 +1,6 @@
 import { describe, expect, it } from "vitest";
-import {
-  calculateBollingerBands,
-  type BollingerBands,
-} from "../src/bollinger-bands.ts";
+import { calculateBollingerBands } from "../src/bollinger-bands.ts";
+import type { BollingerBands } from "../src/types.ts";
 import { calculateSma } from "../src/sma.ts";
 import { buildFixtureCloses, convertToDecimals } from "./helpers.ts";
 

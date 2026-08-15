@@ -1,12 +1,7 @@
-import { listActiveSymbols, type PrismaClient } from "db";
-import { KLINE_INTERVALS, type BinanceClient } from "./binance.ts";
+import { KLINE_INTERVALS } from "core";
+import { listActiveSymbols } from "db";
 import { updateSeries } from "./series.ts";
-
-export type HourlyDependencies = {
-  db: PrismaClient;
-  binance: BinanceClient;
-  now: () => number;
-};
+import type { HourlyDependencies } from "./types.ts";
 
 export async function main(dependencies: HourlyDependencies): Promise<void> {
   const { db, binance, now } = dependencies;

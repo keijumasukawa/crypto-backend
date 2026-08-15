@@ -1,5 +1,6 @@
 import type { KlineRow } from "db";
-import type { Kline, KlineInterval } from "./binance.ts";
+import type { KlineInterval } from "core";
+import type { Kline } from "./types.ts";
 
 export function buildKlineRows(
   symbol: string,

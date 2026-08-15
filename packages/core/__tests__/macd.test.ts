@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { calculateEma } from "../src/ema.ts";
-import { calculateMacd, type MacdValue } from "../src/macd.ts";
+import { calculateMacd } from "../src/macd.ts";
+import type { MacdValue } from "../src/types.ts";
 import { buildFixtureCloses, convertToDecimals } from "./helpers.ts";
 
 function convertToStrings(values: MacdValue[]) {

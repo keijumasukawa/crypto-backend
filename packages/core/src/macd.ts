@@ -1,17 +1,6 @@
 import { Decimal, roundDecimal } from "./decimal.ts";
 import { calculateEma } from "./ema.ts";
-
-export type MacdState = {
-  shortEma: Decimal;
-  longEma: Decimal;
-  signalEma: Decimal;
-};
-
-export type MacdValue = {
-  macd: Decimal | null;
-  macdSignal: Decimal | null;
-  macdHist: Decimal | null;
-};
+import type { MacdState, MacdValue } from "./types.ts";
 
 export function calculateMacd(
   closes: Decimal[],
