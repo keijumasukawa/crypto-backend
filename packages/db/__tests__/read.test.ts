@@ -11,6 +11,7 @@ import {
   listIndicatorValuesAfter,
   listKlines,
   listKlinesAfter,
+  listSignals,
   listSymbols,
 } from "../src/read.ts";
 
@@ -426,6 +427,61 @@ describe("getLatestSignalOpenTime", () => {
       where: { symbol: "BTCUSDT", interval: "1d", logicVersion: "rule-v1" },
       orderBy: { openTime: "desc" },
     });
+  });
+});
+
+function buildSignalRecord(openTime: number) {
+  return {
+    symbol: "BTCUSDT",
+    interval: "1d",
+    openTime: BigInt(openTime),
+    logicVersion: "rule-v1",
+    direction: "neutral",
+    score: "0.2",
+    components: { v: [1, 0, 0, 0, 0], e: 31 },
+    generatedAt: new Date("2026-08-06T00:00:00.000Z"),
+  };
+}
+
+describe("listSignals", () => {
+  it("logicVersion を含む条件で最新側から limit 件を取得し昇順で返す", async () => {
+    let capturedArgs: unknown;
+    const db = {
+      signal: {
+        findMany: (args: unknown) => {
+          capturedArgs = args;
+          return Promise.resolve([
+            buildSignalRecord(1200),
+            buildSignalRecord(1100),
+          ]);
+        },
+      },
+    } as unknown as PrismaClient;
+
+    const rows = await listSignals(db, "BTCUSDT", "1d", "rule-v1", 2);
+
+    expect(rows.map((row) => row.openTime)).toEqual([1100n, 1200n]);
+    expect(capturedArgs).toMatchObject({
+      where: { symbol: "BTCUSDT", interval: "1d", logicVersion: "rule-v1" },
+      orderBy: { openTime: "desc" },
+      take: 2,
+    });
+  });
+
+  it("score の Decimal 値を文字列へ変換する", async () => {
+    const record = {
+      ...buildSignalRecord(0),
+      score: { toString: () => "0.4000000000" },
+    };
+    const db = {
+      signal: {
+        findMany: () => Promise.resolve([record]),
+      },
+    } as unknown as PrismaClient;
+
+    const rows = await listSignals(db, "BTCUSDT", "1d", "rule-v1", 1);
+
+    expect(rows[0]?.score).toBe("0.4000000000");
   });
 });
 

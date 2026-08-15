@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { parseSeriesQuery } from "../src/query.ts";
+import { parseSeriesQuery, parseSignalQuery } from "../src/query.ts";
 
 describe("parseSeriesQuery", () => {
   it("必須のみの指定で既定値を適用する", () => {
@@ -66,6 +66,59 @@ describe("parseSeriesQuery", () => {
     ).toMatchObject({ isValid: false });
     expect(
       parseSeriesQuery({ symbol: "BTCUSDT", interval: "1h", limit: "1001" }),
+    ).toMatchObject({ isValid: false });
+  });
+});
+
+describe("parseSignalQuery", () => {
+  it("必須のみの指定で既定値を適用する", () => {
+    const result = parseSignalQuery({ symbol: "BTCUSDT", interval: "1h" });
+
+    expect(result).toEqual({
+      isValid: true,
+      query: {
+        symbol: "BTCUSDT",
+        interval: "1h",
+        logicVersion: "rule-v1",
+        limit: 100,
+      },
+    });
+  });
+
+  it("全パラメータを解析する", () => {
+    const result = parseSignalQuery({
+      symbol: "BTCUSDT",
+      interval: "1d",
+      logicVersion: "rule-v2",
+      limit: "500",
+    });
+
+    expect(result).toEqual({
+      isValid: true,
+      query: {
+        symbol: "BTCUSDT",
+        interval: "1d",
+        logicVersion: "rule-v2",
+        limit: 500,
+      },
+    });
+  });
+
+  it("symbol がない場合は無効とする", () => {
+    expect(parseSignalQuery({ interval: "1h" })).toMatchObject({
+      isValid: false,
+    });
+  });
+
+  it("interval が不正な場合は無効とする", () => {
+    expect(
+      parseSignalQuery({ symbol: "BTCUSDT", interval: "5m" }),
+    ).toMatchObject({ isValid: false });
+  });
+
+  it("limit が範囲外の場合は無効とする", () => {
+    expect(
+      parseSignalQuery({ symbol: "BTCUSDT", interval: "1h", limit: "1001" }),
     ).toMatchObject({ isValid: false });
   });
 });

@@ -18,6 +18,16 @@ export type SeriesQuery = {
 export type SeriesQueryResult =
   { isValid: true; query: SeriesQuery } | { isValid: false; message: string };
 
+export type SignalQuery = {
+  symbol: string;
+  interval: KlineInterval;
+  logicVersion: string;
+  limit: number;
+};
+
+export type SignalQueryResult =
+  { isValid: true; query: SignalQuery } | { isValid: false; message: string };
+
 export type KlineResponse = {
   symbol: string;
   interval: string;

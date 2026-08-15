@@ -1,5 +1,10 @@
 import type { PrismaClient } from "../generated/prisma/client.ts";
-import type { IndicatorValueRow, KlineRow, SymbolRecord } from "./types.ts";
+import type {
+  IndicatorValueRow,
+  KlineRow,
+  SignalRow,
+  SymbolRecord,
+} from "./types.ts";
 
 type KlineRecord = {
   symbol: string;
@@ -35,6 +40,17 @@ type IndicatorValueRecord = {
   bbLower: { toString: () => string } | null;
   rsiAvgGain14: { toString: () => string } | null;
   rsiAvgLoss14: { toString: () => string } | null;
+};
+
+type SignalRecord = {
+  symbol: string;
+  interval: string;
+  openTime: bigint;
+  logicVersion: string;
+  direction: string;
+  score: { toString: () => string };
+  components: unknown;
+  generatedAt: Date;
 };
 
 function convertToKlineRow(record: KlineRecord): KlineRow {
@@ -76,6 +92,19 @@ function convertToIndicatorValueRow(
     bbLower: record.bbLower?.toString() ?? null,
     rsiAvgGain14: record.rsiAvgGain14?.toString() ?? null,
     rsiAvgLoss14: record.rsiAvgLoss14?.toString() ?? null,
+  };
+}
+
+function convertToSignalRow(record: SignalRecord): SignalRow {
+  return {
+    symbol: record.symbol,
+    interval: record.interval,
+    openTime: record.openTime,
+    logicVersion: record.logicVersion,
+    direction: record.direction,
+    score: record.score.toString(),
+    components: record.components,
+    generatedAt: record.generatedAt,
   };
 }
 
@@ -274,4 +303,19 @@ export async function getLatestSignalOpenTime(
     select: { openTime: true },
   });
   return signal?.openTime ?? null;
+}
+
+export async function listSignals(
+  db: PrismaClient,
+  symbol: string,
+  interval: string,
+  logicVersion: string,
+  limit: number,
+): Promise<SignalRow[]> {
+  const records = await db.signal.findMany({
+    where: { symbol, interval, logicVersion },
+    orderBy: { openTime: "desc" },
+    take: limit,
+  });
+  return records.reverse().map(convertToSignalRow);
 }

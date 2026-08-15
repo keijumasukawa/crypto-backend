@@ -2,6 +2,7 @@ import {
   getLatestKlineCloseTime,
   listIndicatorValues,
   listKlines,
+  listSignals,
   listSymbols,
   type PrismaClient,
 } from "db";
@@ -12,6 +13,7 @@ vi.mock("db", () => ({
   getLatestKlineCloseTime: vi.fn(),
   listIndicatorValues: vi.fn(),
   listKlines: vi.fn(),
+  listSignals: vi.fn(),
   listSymbols: vi.fn(),
 }));
 
@@ -231,6 +233,65 @@ describe("GET /api/klines", () => {
   it("キーなしは 401 になる", async () => {
     const response = await buildApp().request(
       "/api/klines?symbol=BTCUSDT&interval=1h",
+    );
+
+    expect(response.status).toBe(401);
+  });
+});
+
+describe("GET /api/signals", () => {
+  it("認証済みでシグナル一覧をシリアライズ規約どおり返す", async () => {
+    vi.mocked(listSignals).mockResolvedValue([
+      {
+        symbol: "BTCUSDT",
+        interval: "1d",
+        openTime: 1_700_000_000_000n,
+        logicVersion: "rule-v1",
+        direction: "bullish",
+        score: "0.4",
+        components: { v: [1, 1, 0, 0, 0], e: 31 },
+        generatedAt: new Date("2026-08-06T00:00:00.000Z"),
+      },
+    ]);
+
+    const response = await buildApp().request(
+      "/api/signals?symbol=BTCUSDT&interval=1d",
+      { headers: { "x-api-key": API_KEY } },
+    );
+
+    expect(response.status).toBe(200);
+    expect(await response.json()).toEqual([
+      {
+        symbol: "BTCUSDT",
+        interval: "1d",
+        openTime: 1_700_000_000_000,
+        logicVersion: "rule-v1",
+        direction: "bullish",
+        score: "0.4000000000",
+        components: { v: [1, 1, 0, 0, 0], e: 31 },
+        generatedAt: "2026-08-06T00:00:00.000Z",
+      },
+    ]);
+    expect(vi.mocked(listSignals)).toHaveBeenCalledWith(
+      dbStub,
+      "BTCUSDT",
+      "1d",
+      "rule-v1",
+      100,
+    );
+  });
+
+  it("不正なクエリは 400 になる", async () => {
+    const response = await buildApp().request("/api/signals?symbol=BTCUSDT", {
+      headers: { "x-api-key": API_KEY },
+    });
+
+    expect(response.status).toBe(400);
+  });
+
+  it("キーなしは 401 になる", async () => {
+    const response = await buildApp().request(
+      "/api/signals?symbol=BTCUSDT&interval=1d",
     );
 
     expect(response.status).toBe(401);
