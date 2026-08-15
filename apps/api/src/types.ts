@@ -1,3 +1,4 @@
+import type { KlineInterval } from "core";
 import type { PrismaClient } from "db";
 
 export type ApiDependencies = {
@@ -5,6 +6,17 @@ export type ApiDependencies = {
   now: () => number;
   apiKey: string;
 };
+
+export type SeriesQuery = {
+  symbol: string;
+  interval: KlineInterval;
+  startTime: bigint | null;
+  endTime: bigint | null;
+  limit: number;
+};
+
+export type SeriesQueryResult =
+  { isValid: true; query: SeriesQuery } | { isValid: false; message: string };
 
 export type KlineResponse = {
   symbol: string;
