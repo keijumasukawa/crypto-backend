@@ -3,7 +3,11 @@ import {
   RULE_V1_LOGIC_VERSION,
   type KlineInterval,
 } from "core";
-import type { SeriesQueryResult, SignalQueryResult } from "./types.ts";
+import type {
+  LatestSignalQueryResult,
+  SeriesQueryResult,
+  SignalQueryResult,
+} from "./types.ts";
 
 const DEFAULT_LIMIT = 100;
 const MAX_LIMIT = 1000;
@@ -106,6 +110,28 @@ export function parseSignalQuery(
           ? RULE_V1_LOGIC_VERSION
           : logicVersion,
       limit: parsedLimit,
+    },
+  };
+}
+
+export function parseLatestSignalQuery(
+  params: Record<string, string>,
+): LatestSignalQueryResult {
+  const { interval, logicVersion } = params;
+  if (interval === undefined || !isKlineInterval(interval)) {
+    return {
+      isValid: false,
+      message: "interval には 1h、4h、1d のいずれかを指定してください。",
+    };
+  }
+  return {
+    isValid: true,
+    query: {
+      interval,
+      logicVersion:
+        logicVersion === undefined || logicVersion === ""
+          ? RULE_V1_LOGIC_VERSION
+          : logicVersion,
     },
   };
 }

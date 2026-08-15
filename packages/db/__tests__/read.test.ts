@@ -11,6 +11,7 @@ import {
   listIndicatorValuesAfter,
   listKlines,
   listKlinesAfter,
+  listLatestSignals,
   listSignals,
   listSymbols,
 } from "../src/read.ts";
@@ -482,6 +483,55 @@ describe("listSignals", () => {
     const rows = await listSignals(db, "BTCUSDT", "1d", "rule-v1", 1);
 
     expect(rows[0]?.score).toBe("0.4000000000");
+  });
+});
+
+describe("listLatestSignals", () => {
+  it("有効な銘柄ごとに最新 1 件を銘柄順で返す", async () => {
+    const findFirstCalls: unknown[] = [];
+    const db = {
+      symbol: {
+        findMany: () =>
+          Promise.resolve([{ symbol: "BTCUSDT" }, { symbol: "ETHUSDT" }]),
+      },
+      signal: {
+        findFirst: (args: unknown) => {
+          findFirstCalls.push(args);
+          return Promise.resolve(buildSignalRecord(1000));
+        },
+      },
+    } as unknown as PrismaClient;
+
+    const rows = await listLatestSignals(db, "1d", "rule-v1");
+
+    expect(rows).toHaveLength(2);
+    expect(findFirstCalls[0]).toMatchObject({
+      where: { symbol: "BTCUSDT", interval: "1d", logicVersion: "rule-v1" },
+      orderBy: { openTime: "desc" },
+    });
+    expect(findFirstCalls[1]).toMatchObject({
+      where: { symbol: "ETHUSDT", interval: "1d", logicVersion: "rule-v1" },
+    });
+  });
+
+  it("シグナルのない銘柄は結果に含めない", async () => {
+    const db = {
+      symbol: {
+        findMany: () =>
+          Promise.resolve([{ symbol: "BTCUSDT" }, { symbol: "ETHUSDT" }]),
+      },
+      signal: {
+        findFirst: (args: { where: { symbol: string } }) =>
+          Promise.resolve(
+            args.where.symbol === "BTCUSDT" ? buildSignalRecord(1000) : null,
+          ),
+      },
+    } as unknown as PrismaClient;
+
+    const rows = await listLatestSignals(db, "1d", "rule-v1");
+
+    expect(rows).toHaveLength(1);
+    expect(rows[0]?.symbol).toBe("BTCUSDT");
   });
 });
 
