@@ -1,5 +1,9 @@
-import { KLINE_INTERVALS, type KlineInterval } from "core";
-import type { SeriesQueryResult } from "./types.ts";
+import {
+  KLINE_INTERVALS,
+  RULE_V1_LOGIC_VERSION,
+  type KlineInterval,
+} from "core";
+import type { SeriesQueryResult, SignalQueryResult } from "./types.ts";
 
 const DEFAULT_LIMIT = 100;
 const MAX_LIMIT = 1000;
@@ -67,6 +71,40 @@ export function parseSeriesQuery(
       interval,
       startTime: parsedStartTime,
       endTime: parsedEndTime,
+      limit: parsedLimit,
+    },
+  };
+}
+
+export function parseSignalQuery(
+  params: Record<string, string>,
+): SignalQueryResult {
+  const { symbol, interval, logicVersion, limit } = params;
+  if (symbol === undefined || symbol === "") {
+    return { isValid: false, message: "symbol を指定してください。" };
+  }
+  if (interval === undefined || !isKlineInterval(interval)) {
+    return {
+      isValid: false,
+      message: "interval には 1h、4h、1d のいずれかを指定してください。",
+    };
+  }
+  const parsedLimit = limit === undefined ? DEFAULT_LIMIT : parseLimit(limit);
+  if (parsedLimit === null) {
+    return {
+      isValid: false,
+      message: "limit には 1 から 1000 までの整数を指定してください。",
+    };
+  }
+  return {
+    isValid: true,
+    query: {
+      symbol,
+      interval,
+      logicVersion:
+        logicVersion === undefined || logicVersion === ""
+          ? RULE_V1_LOGIC_VERSION
+          : logicVersion,
       limit: parsedLimit,
     },
   };
