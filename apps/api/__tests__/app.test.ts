@@ -16,8 +16,10 @@ type HealthResponse = {
   serverTime: number;
 };
 
+const API_KEY = "test-key";
+
 function buildApp() {
-  return createApp({ db: dbStub, now: () => NOW });
+  return createApp({ db: dbStub, now: () => NOW, apiKey: API_KEY });
 }
 
 beforeEach(() => {
@@ -69,9 +71,54 @@ describe("GET /api/health", () => {
 });
 
 describe("ルーティング", () => {
-  it("未定義のルートは 404 を返す", async () => {
-    const response = await buildApp().request("/api/unknown");
+  it("認証済みでも未定義のルートは 404 を返す", async () => {
+    const response = await buildApp().request("/api/unknown", {
+      headers: { "x-api-key": API_KEY },
+    });
 
     expect(response.status).toBe(404);
+  });
+});
+
+describe("API キー認証", () => {
+  function buildProtectedApp() {
+    const app = buildApp();
+    app.get("/api/protected", (c) => c.json({ ok: true }));
+    return app;
+  }
+
+  it("/api/health はキーなしでも通る", async () => {
+    vi.mocked(getLatestKlineCloseTime).mockResolvedValue(BigInt(NOW));
+
+    const response = await buildApp().request("/api/health");
+
+    expect(response.status).toBe(200);
+  });
+
+  it("保護ルートはキーなしで 401 になる", async () => {
+    const response = await buildProtectedApp().request("/api/protected");
+
+    expect(response.status).toBe(401);
+  });
+
+  it("誤ったキーは長さが違っても 401 になる", async () => {
+    const shortKey = await buildProtectedApp().request("/api/protected", {
+      headers: { "x-api-key": "wrong" },
+    });
+    const longKey = await buildProtectedApp().request("/api/protected", {
+      headers: { "x-api-key": "test-key-with-extra-length" },
+    });
+
+    expect(shortKey.status).toBe(401);
+    expect(longKey.status).toBe(401);
+  });
+
+  it("正しいキーで通過する", async () => {
+    const response = await buildProtectedApp().request("/api/protected", {
+      headers: { "x-api-key": API_KEY },
+    });
+
+    expect(response.status).toBe(200);
+    expect(await response.json()).toEqual({ ok: true });
   });
 });
