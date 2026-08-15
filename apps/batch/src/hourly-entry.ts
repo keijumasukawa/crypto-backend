@@ -4,7 +4,7 @@ import { main } from "./hourly.ts";
 
 const connectionString = process.env.DIRECT_URL;
 if (connectionString === undefined) {
-  throw new Error("DIRECT_URL が設定されていません");
+  throw new Error("環境変数 DIRECT_URL を設定してください。");
 }
 
 const db = createPrismaClient(connectionString);

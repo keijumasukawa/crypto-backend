@@ -7,10 +7,10 @@ export function calculateBollingerBands(
   multiplier: number,
 ): (BollingerBands | null)[] {
   if (!Number.isInteger(period) || period < 1) {
-    throw new Error("period は 1 以上の整数とする");
+    throw new Error("period は 1 以上の整数を指定してください。");
   }
   if (!Number.isFinite(multiplier) || multiplier <= 0) {
-    throw new Error("multiplier は正の数とする");
+    throw new Error("multiplier は正の数を指定してください。");
   }
 
   const multiplierDecimal = new Decimal(multiplier);

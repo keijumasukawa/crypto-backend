@@ -58,7 +58,9 @@ export function buildSignalRows(
   function getClose(openTime: bigint): Decimal {
     const close = closes.get(openTime);
     if (close === undefined) {
-      throw new Error("対応する終値が見つからないため中断しました。");
+      throw new Error(
+        "対応する終値が見つからないため中断しました。対象の系列を再計算で復旧してください。",
+      );
     }
     return close;
   }

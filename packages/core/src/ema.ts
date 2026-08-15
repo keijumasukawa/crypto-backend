@@ -6,7 +6,7 @@ export function calculateEma(
   previousEma?: Decimal,
 ): (Decimal | null)[] {
   if (!Number.isInteger(period) || period < 1) {
-    throw new Error("period は 1 以上の整数とする");
+    throw new Error("period は 1 以上の整数を指定してください。");
   }
 
   const smoothingFactor = new Decimal(2).div(period + 1);

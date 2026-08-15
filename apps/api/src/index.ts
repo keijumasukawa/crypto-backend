@@ -3,11 +3,11 @@ import { createApp } from "./app.ts";
 
 const connectionString = process.env.DATABASE_URL;
 if (connectionString === undefined) {
-  throw new Error("DATABASE_URL が設定されていません");
+  throw new Error("環境変数 DATABASE_URL を設定してください。");
 }
 const apiKey = process.env.API_KEY;
 if (apiKey === undefined || apiKey === "") {
-  throw new Error("API_KEY が設定されていません");
+  throw new Error("環境変数 API_KEY を設定してください。");
 }
 
 const app = createApp({

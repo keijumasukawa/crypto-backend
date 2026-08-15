@@ -21,7 +21,7 @@ export function calculateRsi(
   previousState?: RsiState,
 ): (RsiValue | null)[] {
   if (!Number.isInteger(period) || period < 1) {
-    throw new Error("period は 1 以上の整数とする");
+    throw new Error("period は 1 以上の整数を指定してください。");
   }
 
   const values: (RsiValue | null)[] = [];
