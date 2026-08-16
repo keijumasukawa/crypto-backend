@@ -1,6 +1,6 @@
 import { createPrismaClient } from "db";
-import { createBinanceClient } from "./binance.ts";
-import { updateSeries, validateKlineInterval } from "./series.ts";
+import { createBinanceClient } from "./binance.js";
+import { updateSeries, validateKlineInterval } from "./series.js";
 
 const connectionString = process.env.DIRECT_URL;
 if (connectionString === undefined) {

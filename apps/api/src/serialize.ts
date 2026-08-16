@@ -5,7 +5,7 @@ import type {
   KlineResponse,
   SignalResponse,
   SymbolResponse,
-} from "./types.ts";
+} from "./types.js";
 
 export function formatDecimal(value: string): string {
   return new Decimal(value).toFixed(DECIMAL_PLACES);

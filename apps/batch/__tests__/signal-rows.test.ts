@@ -1,6 +1,6 @@
 import type { IndicatorValueRow, KlineRow } from "db";
 import { describe, expect, it } from "vitest";
-import { buildSignalRows } from "../src/signal-rows.ts";
+import { buildSignalRows } from "../src/signal-rows.js";
 
 const GENERATED_AT = new Date("2026-01-01T00:00:00.000Z");
 

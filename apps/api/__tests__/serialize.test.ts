@@ -6,7 +6,7 @@ import {
   convertToSignalResponse,
   convertToSymbolResponse,
   formatDecimal,
-} from "../src/serialize.ts";
+} from "../src/serialize.js";
 
 function buildKlineRow(): KlineRow {
   return {

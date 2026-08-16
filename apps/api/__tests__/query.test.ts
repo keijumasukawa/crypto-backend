@@ -3,7 +3,7 @@ import {
   parseLatestSignalQuery,
   parseSeriesQuery,
   parseSignalQuery,
-} from "../src/query.ts";
+} from "../src/query.js";
 
 describe("parseSeriesQuery", () => {
   it("必須のみの指定で既定値を適用する", () => {

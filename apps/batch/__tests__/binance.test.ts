@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { createBinanceClient } from "../src/binance.ts";
+import { createBinanceClient } from "../src/binance.js";
 
 const EXCHANGE_INFO_BODY = {
   rateLimits: [

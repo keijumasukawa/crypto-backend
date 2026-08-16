@@ -7,7 +7,7 @@ import type {
   LatestSignalQueryResult,
   SeriesQueryResult,
   SignalQueryResult,
-} from "./types.ts";
+} from "./types.js";
 
 const DEFAULT_LIMIT = 100;
 const MAX_LIMIT = 1000;

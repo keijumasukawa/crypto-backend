@@ -1,5 +1,5 @@
 import { createPrismaClient } from "db";
-import { createApp } from "./app.ts";
+import { createApp } from "./app.js";
 
 const connectionString = process.env.DATABASE_URL;
 if (connectionString === undefined) {

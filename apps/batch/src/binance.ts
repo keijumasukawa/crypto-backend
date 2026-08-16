@@ -4,7 +4,7 @@ import type {
   BinanceClient,
   BinanceClientDependencies,
   Kline,
-} from "./types.ts";
+} from "./types.js";
 
 const DEFAULT_BASE_URL = "https://data-api.binance.vision";
 const KLINES_PATH = "/api/v3/klines";
