@@ -1,4 +1,5 @@
 import { createPrismaClient } from "db";
+import { Hono } from "hono";
 import { createApp } from "./create-app.js";
 
 const connectionString = process.env.DATABASE_URL;
@@ -10,10 +11,14 @@ if (apiKey === undefined || apiKey === "") {
   throw new Error("環境変数 API_KEY を設定してください。");
 }
 
-const app = createApp({
-  db: createPrismaClient(connectionString),
-  now: Date.now,
-  apiKey,
-});
+const app = new Hono();
+app.route(
+  "/",
+  createApp({
+    db: createPrismaClient(connectionString),
+    now: Date.now,
+    apiKey,
+  }),
+);
 
 export default app;
