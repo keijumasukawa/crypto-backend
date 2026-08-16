@@ -212,15 +212,22 @@ describe("main", () => {
     );
   });
 
-  it("途中の失敗で後続の処理を行わず例外を伝播する", async () => {
-    vi.mocked(updateKlines).mockRejectedValue(new Error("書き込みに失敗"));
+  it("系列の失敗を隔離して残りを継続し、最後に失敗を集約した例外を投げる", async () => {
+    vi.mocked(updateKlines).mockRejectedValueOnce(new Error("書き込みに失敗"));
+    const consoleError = vi
+      .spyOn(console, "error")
+      .mockImplementation(() => {});
     const dependencies = buildDependencies();
 
-    await expect(main(dependencies)).rejects.toThrow("書き込みに失敗");
+    await expect(main(dependencies)).rejects.toThrow(
+      "一部の系列の更新に失敗しました(BTCUSDT 1h)。ログを確認してください。",
+    );
 
-    expect(dependencies.binance.listKlines).toHaveBeenCalledTimes(1);
-    expect(vi.mocked(updateIndicatorValues)).not.toHaveBeenCalled();
-    expect(vi.mocked(updateSignals)).not.toHaveBeenCalled();
+    expect(dependencies.binance.listKlines).toHaveBeenCalledTimes(3);
+    expect(vi.mocked(updateKlines)).toHaveBeenCalledTimes(3);
+    expect(vi.mocked(updateIndicatorValues)).toHaveBeenCalledTimes(2);
+    expect(vi.mocked(updateSignals)).toHaveBeenCalledTimes(2);
+    consoleError.mockRestore();
   });
 
   it("生成時刻は実行全体で一度だけ取得し、全 signals 行で同一になる", async () => {
