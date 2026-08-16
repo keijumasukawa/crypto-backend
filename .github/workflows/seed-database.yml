@@ -21,7 +21,7 @@ jobs:
       - run: pnpm --filter db run generate
         env:
           DIRECT_URL: ${{ secrets.DIRECT_URL }}
-      - run: pnpm --recursive run --if-present build
+      - run: pnpm --recursive run build
       - run: pnpm --filter db exec prisma db seed
         env:
           DIRECT_URL: ${{ secrets.DIRECT_URL }}
