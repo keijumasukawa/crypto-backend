@@ -253,6 +253,30 @@ describe("listKlines", () => {
       orderBy: { openTime: "asc" },
     });
   });
+
+  it("endTime のみ指定時は endTime 以前の最新側から取得し昇順で返す", async () => {
+    let capturedArgs: unknown;
+    const db = {
+      kline: {
+        findMany: (args: unknown) => {
+          capturedArgs = args;
+          return Promise.resolve([
+            buildKlineRecord(2000),
+            buildKlineRecord(1900),
+          ]);
+        },
+      },
+    } as unknown as PrismaClient;
+
+    const rows = await listKlines(db, "BTCUSDT", "1d", null, 2000n, 2);
+
+    expect(rows.map((row) => row.openTime)).toEqual([1900n, 2000n]);
+    expect(capturedArgs).toMatchObject({
+      where: { symbol: "BTCUSDT", interval: "1d", openTime: { lte: 2000n } },
+      orderBy: { openTime: "desc" },
+      take: 2,
+    });
+  });
 });
 
 describe("getLatestIndicatorValueOpenTime", () => {
@@ -402,6 +426,30 @@ describe("listIndicatorValues", () => {
       orderBy: { openTime: "asc" },
     });
   });
+
+  it("endTime のみ指定時は endTime 以前の最新側から取得し昇順で返す", async () => {
+    let capturedArgs: unknown;
+    const db = {
+      indicatorValue: {
+        findMany: (args: unknown) => {
+          capturedArgs = args;
+          return Promise.resolve([
+            buildIndicatorValueRecord(2000),
+            buildIndicatorValueRecord(1900),
+          ]);
+        },
+      },
+    } as unknown as PrismaClient;
+
+    const rows = await listIndicatorValues(db, "BTCUSDT", "1d", null, 2000n, 2);
+
+    expect(rows.map((row) => row.openTime)).toEqual([1900n, 2000n]);
+    expect(capturedArgs).toMatchObject({
+      where: { symbol: "BTCUSDT", interval: "1d", openTime: { lte: 2000n } },
+      orderBy: { openTime: "desc" },
+      take: 2,
+    });
+  });
 });
 
 describe("getLatestSignalOpenTime", () => {
@@ -523,6 +571,43 @@ describe("listSignals", () => {
         openTime: { gte: 1000n },
       },
       orderBy: { openTime: "asc" },
+    });
+  });
+
+  it("endTime のみ指定時は endTime 以前の最新側から取得し昇順で返す", async () => {
+    let capturedArgs: unknown;
+    const db = {
+      signal: {
+        findMany: (args: unknown) => {
+          capturedArgs = args;
+          return Promise.resolve([
+            buildSignalRecord(2000),
+            buildSignalRecord(1900),
+          ]);
+        },
+      },
+    } as unknown as PrismaClient;
+
+    const rows = await listSignals(
+      db,
+      "BTCUSDT",
+      "1d",
+      "rule-v1",
+      null,
+      2000n,
+      2,
+    );
+
+    expect(rows.map((row) => row.openTime)).toEqual([1900n, 2000n]);
+    expect(capturedArgs).toMatchObject({
+      where: {
+        symbol: "BTCUSDT",
+        interval: "1d",
+        logicVersion: "rule-v1",
+        openTime: { lte: 2000n },
+      },
+      orderBy: { openTime: "desc" },
+      take: 2,
     });
   });
 
