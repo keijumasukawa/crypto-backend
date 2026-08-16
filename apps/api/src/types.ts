@@ -22,6 +22,8 @@ export type SignalQuery = {
   symbol: string;
   interval: KlineInterval;
   logicVersion: string;
+  startTime: bigint | null;
+  endTime: bigint | null;
   limit: number;
 };
 

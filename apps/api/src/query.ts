@@ -83,7 +83,7 @@ export function parseSeriesQuery(
 export function parseSignalQuery(
   params: Record<string, string>,
 ): SignalQueryResult {
-  const { symbol, interval, logicVersion, limit } = params;
+  const { symbol, interval, logicVersion, startTime, endTime, limit } = params;
   if (symbol === undefined || symbol === "") {
     return { isValid: false, message: "symbol を指定してください。" };
   }
@@ -91,6 +91,20 @@ export function parseSignalQuery(
     return {
       isValid: false,
       message: "interval には 1h、4h、1d のいずれかを指定してください。",
+    };
+  }
+  const parsedStartTime = parseEpochMilliseconds(startTime);
+  if (parsedStartTime === undefined) {
+    return {
+      isValid: false,
+      message: "startTime にはミリ秒単位の時刻を整数で指定してください。",
+    };
+  }
+  const parsedEndTime = parseEpochMilliseconds(endTime);
+  if (parsedEndTime === undefined) {
+    return {
+      isValid: false,
+      message: "endTime にはミリ秒単位の時刻を整数で指定してください。",
     };
   }
   const parsedLimit = limit === undefined ? DEFAULT_LIMIT : parseLimit(limit);
@@ -109,6 +123,8 @@ export function parseSignalQuery(
         logicVersion === undefined || logicVersion === ""
           ? RULE_V1_LOGIC_VERSION
           : logicVersion,
+      startTime: parsedStartTime,
+      endTime: parsedEndTime,
       limit: parsedLimit,
     },
   };

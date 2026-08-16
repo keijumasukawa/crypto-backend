@@ -310,14 +310,33 @@ export async function listSignals(
   symbol: string,
   interval: string,
   logicVersion: string,
+  startTime: bigint | null,
+  endTime: bigint | null,
   limit: number,
 ): Promise<SignalRow[]> {
+  if (startTime === null && endTime === null) {
+    const records = await db.signal.findMany({
+      where: { symbol, interval, logicVersion },
+      orderBy: { openTime: "desc" },
+      take: limit,
+    });
+    return records.reverse().map(convertToSignalRow);
+  }
+
   const records = await db.signal.findMany({
-    where: { symbol, interval, logicVersion },
-    orderBy: { openTime: "desc" },
+    where: {
+      symbol,
+      interval,
+      logicVersion,
+      openTime: {
+        ...(startTime === null ? {} : { gte: startTime }),
+        ...(endTime === null ? {} : { lte: endTime }),
+      },
+    },
+    orderBy: { openTime: "asc" },
     take: limit,
   });
-  return records.reverse().map(convertToSignalRow);
+  return records.map(convertToSignalRow);
 }
 
 export async function listLatestSignals(

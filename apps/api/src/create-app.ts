@@ -91,12 +91,15 @@ export function createApp(dependencies: ApiDependencies): Hono {
     if (!result.isValid) {
       return c.json({ message: result.message }, 400);
     }
-    const { symbol, interval, logicVersion, limit } = result.query;
+    const { symbol, interval, logicVersion, startTime, endTime, limit } =
+      result.query;
     const signals = await listSignals(
       db,
       symbol,
       interval,
       logicVersion,
+      startTime,
+      endTime,
       limit,
     );
     return c.json(signals.map(convertToSignalResponse));

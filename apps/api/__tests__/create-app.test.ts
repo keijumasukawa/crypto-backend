@@ -286,6 +286,28 @@ describe("GET /api/signals", () => {
       "BTCUSDT",
       "1d",
       "rule-v1",
+      null,
+      null,
+      100,
+    );
+  });
+
+  it("期間を指定して取得できる", async () => {
+    vi.mocked(listSignals).mockResolvedValue([]);
+
+    const response = await buildApp().request(
+      "/api/signals?symbol=BTCUSDT&interval=1d&startTime=1000&endTime=2000",
+      { headers: { "x-api-key": API_KEY } },
+    );
+
+    expect(response.status).toBe(200);
+    expect(vi.mocked(listSignals)).toHaveBeenCalledWith(
+      dbStub,
+      "BTCUSDT",
+      "1d",
+      "rule-v1",
+      1000n,
+      2000n,
       100,
     );
   });

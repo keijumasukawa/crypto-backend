@@ -84,6 +84,8 @@ describe("parseSignalQuery", () => {
         symbol: "BTCUSDT",
         interval: "1h",
         logicVersion: "rule-v1",
+        startTime: null,
+        endTime: null,
         limit: 100,
       },
     });
@@ -94,6 +96,8 @@ describe("parseSignalQuery", () => {
       symbol: "BTCUSDT",
       interval: "1d",
       logicVersion: "rule-v2",
+      startTime: "1600000000000",
+      endTime: "1700000000000",
       limit: "500",
     });
 
@@ -103,9 +107,21 @@ describe("parseSignalQuery", () => {
         symbol: "BTCUSDT",
         interval: "1d",
         logicVersion: "rule-v2",
+        startTime: 1600000000000n,
+        endTime: 1700000000000n,
         limit: 500,
       },
     });
+  });
+
+  it("startTime が整数でない場合は無効とする", () => {
+    expect(
+      parseSignalQuery({
+        symbol: "BTCUSDT",
+        interval: "1h",
+        startTime: "abc",
+      }),
+    ).toMatchObject({ isValid: false });
   });
 
   it("symbol がない場合は無効とする", () => {

@@ -459,13 +459,70 @@ describe("listSignals", () => {
       },
     } as unknown as PrismaClient;
 
-    const rows = await listSignals(db, "BTCUSDT", "1d", "rule-v1", 2);
+    const rows = await listSignals(
+      db,
+      "BTCUSDT",
+      "1d",
+      "rule-v1",
+      null,
+      null,
+      2,
+    );
 
     expect(rows.map((row) => row.openTime)).toEqual([1100n, 1200n]);
     expect(capturedArgs).toMatchObject({
       where: { symbol: "BTCUSDT", interval: "1d", logicVersion: "rule-v1" },
       orderBy: { openTime: "desc" },
       take: 2,
+    });
+  });
+
+  it("期間指定がある場合は範囲を昇順で走査し先頭から limit 件を返す", async () => {
+    let capturedArgs: unknown;
+    const db = {
+      signal: {
+        findMany: (args: unknown) => {
+          capturedArgs = args;
+          return Promise.resolve([buildSignalRecord(1000)]);
+        },
+      },
+    } as unknown as PrismaClient;
+
+    await listSignals(db, "BTCUSDT", "1d", "rule-v1", 1000n, 2000n, 100);
+
+    expect(capturedArgs).toMatchObject({
+      where: {
+        symbol: "BTCUSDT",
+        interval: "1d",
+        logicVersion: "rule-v1",
+        openTime: { gte: 1000n, lte: 2000n },
+      },
+      orderBy: { openTime: "asc" },
+      take: 100,
+    });
+  });
+
+  it("片側のみの期間指定はその境界だけを条件に含める", async () => {
+    let capturedArgs: unknown;
+    const db = {
+      signal: {
+        findMany: (args: unknown) => {
+          capturedArgs = args;
+          return Promise.resolve([]);
+        },
+      },
+    } as unknown as PrismaClient;
+
+    await listSignals(db, "BTCUSDT", "1d", "rule-v1", 1000n, null, 100);
+
+    expect(capturedArgs).toMatchObject({
+      where: {
+        symbol: "BTCUSDT",
+        interval: "1d",
+        logicVersion: "rule-v1",
+        openTime: { gte: 1000n },
+      },
+      orderBy: { openTime: "asc" },
     });
   });
 
@@ -480,7 +537,15 @@ describe("listSignals", () => {
       },
     } as unknown as PrismaClient;
 
-    const rows = await listSignals(db, "BTCUSDT", "1d", "rule-v1", 1);
+    const rows = await listSignals(
+      db,
+      "BTCUSDT",
+      "1d",
+      "rule-v1",
+      null,
+      null,
+      1,
+    );
 
     expect(rows[0]?.score).toBe("0.4000000000");
   });
