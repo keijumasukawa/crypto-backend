@@ -23,7 +23,7 @@ jobs:
       - run: pnpm --filter db run generate
         env:
           DIRECT_URL: ${{ secrets.DIRECT_URL }}
-      - run: pnpm --recursive run build
+      - run: pnpm --recursive run --if-present build
       - run: pnpm --filter batch run hourly
         env:
           DIRECT_URL: ${{ secrets.DIRECT_URL }}
