@@ -8,9 +8,20 @@ export async function main(dependencies: HourlyDependencies): Promise<void> {
   const generatedAt = new Date(now());
 
   const symbols = await listActiveSymbols(db);
+  const failedSeries: string[] = [];
   for (const symbol of symbols) {
     for (const interval of KLINE_INTERVALS) {
-      await updateSeries(db, binance, symbol, interval, generatedAt);
+      try {
+        await updateSeries(db, binance, symbol, interval, generatedAt);
+      } catch (error) {
+        failedSeries.push(`${symbol} ${interval}`);
+        console.error(error);
+      }
     }
+  }
+  if (failedSeries.length > 0) {
+    throw new Error(
+      `一部の系列の更新に失敗しました(${failedSeries.join("、")})。ログを確認してください。`,
+    );
   }
 }
