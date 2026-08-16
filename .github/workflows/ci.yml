@@ -21,5 +21,6 @@ jobs:
       - run: pnpm --filter db run generate
         env:
           DIRECT_URL: postgresql://placeholder:placeholder@localhost:5432/placeholder
+      - run: pnpm --recursive run --if-present build
       - run: pnpm typecheck
       - run: pnpm test
