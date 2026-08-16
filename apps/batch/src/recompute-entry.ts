@@ -2,8 +2,10 @@ import {
   createPrismaClient,
   deleteIndicatorValuesFrom,
   deleteSignalsFrom,
+  updateKlines,
 } from "db";
 import { createBinanceClient } from "./binance.js";
+import { buildKlineRows } from "./kline-rows.js";
 import {
   parseOpenTime,
   updateSeries,
@@ -24,7 +26,10 @@ const openTime = parseOpenTime(process.env.OPEN_TIME);
 const db = createPrismaClient(connectionString);
 const binance = createBinanceClient();
 
-deleteSignalsFrom(db, symbol, interval, openTime)
+binance
+  .listKlines(symbol, interval, openTime)
+  .then((klines) => updateKlines(db, buildKlineRows(symbol, interval, klines)))
+  .then(() => deleteSignalsFrom(db, symbol, interval, openTime))
   .then(() => deleteIndicatorValuesFrom(db, symbol, interval, openTime))
   .then(() => updateSeries(db, binance, symbol, interval, new Date(Date.now())))
   .then(async () => {
