@@ -1,4 +1,4 @@
-import type { Decimal } from "./decimal.ts";
+import type { Decimal } from "./decimal.js";
 
 export const KLINE_INTERVALS = ["1h", "4h", "1d"] as const;
 

@@ -1,5 +1,5 @@
-import { Decimal, roundDecimal } from "./decimal.ts";
-import type { RsiState, RsiValue } from "./types.ts";
+import { Decimal, roundDecimal } from "./decimal.js";
+import type { RsiState, RsiValue } from "./types.js";
 
 const MAX_RSI = new Decimal(100);
 const MIN_RSI = new Decimal(0);

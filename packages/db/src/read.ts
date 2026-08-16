@@ -1,10 +1,10 @@
-import type { PrismaClient } from "../generated/prisma/client.ts";
+import type { PrismaClient } from "../generated/prisma/client.js";
 import type {
   IndicatorValueRow,
   KlineRow,
   SignalRow,
   SymbolRecord,
-} from "./types.ts";
+} from "./types.js";
 
 type KlineRecord = {
   symbol: string;

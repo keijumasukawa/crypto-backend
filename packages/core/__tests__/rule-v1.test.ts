@@ -1,15 +1,15 @@
 import { describe, expect, it } from "vitest";
-import { Decimal } from "../src/decimal.ts";
+import { Decimal } from "../src/decimal.js";
 import {
   calculateRuleV1Signal,
   convertToStoredComponents,
-} from "../src/rule-v1.ts";
+} from "../src/rule-v1.js";
 import type {
   PreviousSignalInput,
   SignalInput,
   SignalRule,
   SignalRuleId,
-} from "../src/types.ts";
+} from "../src/types.js";
 
 function buildInput(overrides: Partial<SignalInput> = {}): SignalInput {
   return {

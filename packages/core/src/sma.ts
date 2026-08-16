@@ -1,4 +1,4 @@
-import { Decimal, roundDecimal } from "./decimal.ts";
+import { Decimal, roundDecimal } from "./decimal.js";
 
 export function calculateSma(
   closes: Decimal[],

@@ -1,4 +1,4 @@
-import { Decimal } from "../src/decimal.ts";
+import { Decimal } from "../src/decimal.js";
 
 export function convertToDecimals(values: string[]): Decimal[] {
   return values.map((value) => new Decimal(value));

@@ -1,4 +1,4 @@
-import { createPrismaClient } from "../src/client.ts";
+import { createPrismaClient } from "../src/client.js";
 
 const SYMBOLS = [
   {

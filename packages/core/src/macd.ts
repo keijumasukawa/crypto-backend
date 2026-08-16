@@ -1,6 +1,6 @@
-import { Decimal, roundDecimal } from "./decimal.ts";
-import { calculateEma } from "./ema.ts";
-import type { MacdState, MacdValue } from "./types.ts";
+import { Decimal, roundDecimal } from "./decimal.js";
+import { calculateEma } from "./ema.js";
+import type { MacdState, MacdValue } from "./types.js";
 
 export function calculateMacd(
   closes: Decimal[],

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { convertToDecimal, Decimal, roundDecimal } from "../src/decimal.ts";
+import { convertToDecimal, Decimal, roundDecimal } from "../src/decimal.js";
 
 describe("roundDecimal", () => {
   it("小数 10 桁を超える値を 10 桁に丸める", () => {

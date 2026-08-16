@@ -1,4 +1,4 @@
-import { Decimal, roundDecimal } from "./decimal.ts";
+import { Decimal, roundDecimal } from "./decimal.js";
 import type {
   PreviousSignalInput,
   RuleResult,
@@ -8,7 +8,7 @@ import type {
   SignalInput,
   SignalRule,
   StoredSignalComponents,
-} from "./types.ts";
+} from "./types.js";
 
 export const RULE_V1_LOGIC_VERSION = "rule-v1";
 

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import type { PrismaClient } from "../generated/prisma/client.ts";
+import type { PrismaClient } from "../generated/prisma/client.js";
 import {
   getIndicatorValueRow,
   getLatestIndicatorValueOpenTime,
@@ -14,7 +14,7 @@ import {
   listLatestSignals,
   listSignals,
   listSymbols,
-} from "../src/read.ts";
+} from "../src/read.js";
 
 function buildKlineRecord(openTime: number) {
   return {
