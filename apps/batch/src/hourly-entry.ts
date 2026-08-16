@@ -1,6 +1,6 @@
 import { createPrismaClient } from "db";
-import { createBinanceClient } from "./binance.ts";
-import { main } from "./hourly.ts";
+import { createBinanceClient } from "./binance.js";
+import { main } from "./hourly.js";
 
 const connectionString = process.env.DIRECT_URL;
 if (connectionString === undefined) {

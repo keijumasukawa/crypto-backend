@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import type { Kline } from "../src/types.ts";
-import { buildKlineRows } from "../src/kline-rows.ts";
+import type { Kline } from "../src/types.js";
+import { buildKlineRows } from "../src/kline-rows.js";
 
 function buildKline(openTime: number): Kline {
   return {

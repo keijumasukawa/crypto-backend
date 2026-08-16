@@ -1,7 +1,7 @@
 import { KLINE_INTERVALS } from "core";
 import { listActiveSymbols } from "db";
-import { updateSeries } from "./series.ts";
-import type { HourlyDependencies } from "./types.ts";
+import { updateSeries } from "./series.js";
+import type { HourlyDependencies } from "./types.js";
 
 export async function main(dependencies: HourlyDependencies): Promise<void> {
   const { db, binance, now } = dependencies;

@@ -8,19 +8,19 @@ import {
   listSymbols,
 } from "db";
 import { Hono } from "hono";
-import { createApiKeyAuth } from "./auth.ts";
+import { createApiKeyAuth } from "./auth.js";
 import {
   parseLatestSignalQuery,
   parseSeriesQuery,
   parseSignalQuery,
-} from "./query.ts";
+} from "./query.js";
 import {
   convertToIndicatorValueResponse,
   convertToKlineResponse,
   convertToSignalResponse,
   convertToSymbolResponse,
-} from "./serialize.ts";
-import type { ApiDependencies } from "./types.ts";
+} from "./serialize.js";
+import type { ApiDependencies } from "./types.js";
 
 const STALE_THRESHOLD_MILLISECONDS = 2 * 60 * 60 * 1000;
 

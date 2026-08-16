@@ -1,6 +1,6 @@
 import type { KlineRow } from "db";
 import { describe, expect, it } from "vitest";
-import { buildIndicatorValueRows } from "../src/indicator-value-rows.ts";
+import { buildIndicatorValueRows } from "../src/indicator-value-rows.js";
 
 const LOOKBACK_COUNT = 199;
 

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { parseOpenTime, validateKlineInterval } from "../src/series.ts";
+import { parseOpenTime, validateKlineInterval } from "../src/series.js";
 
 describe("validateKlineInterval", () => {
   it("対象のインターバルを受理する", () => {

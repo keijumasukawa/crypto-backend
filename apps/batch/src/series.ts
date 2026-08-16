@@ -12,10 +12,10 @@ import {
   type PrismaClient,
 } from "db";
 import { KLINE_INTERVALS, type KlineInterval } from "core";
-import type { BinanceClient } from "./types.ts";
-import { buildIndicatorValueRows } from "./indicator-value-rows.ts";
-import { buildKlineRows } from "./kline-rows.ts";
-import { buildSignalRows } from "./signal-rows.ts";
+import type { BinanceClient } from "./types.js";
+import { buildIndicatorValueRows } from "./indicator-value-rows.js";
+import { buildKlineRows } from "./kline-rows.js";
+import { buildSignalRows } from "./signal-rows.js";
 
 const COMPUTE_LOOKBACK_COUNT = 199;
 const SIGNAL_LOOKBACK_COUNT = 1;

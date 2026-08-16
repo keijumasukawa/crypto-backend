@@ -3,12 +3,12 @@ import {
   deleteIndicatorValuesFrom,
   deleteSignalsFrom,
 } from "db";
-import { createBinanceClient } from "./binance.ts";
+import { createBinanceClient } from "./binance.js";
 import {
   parseOpenTime,
   updateSeries,
   validateKlineInterval,
-} from "./series.ts";
+} from "./series.js";
 
 const connectionString = process.env.DIRECT_URL;
 if (connectionString === undefined) {

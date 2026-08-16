@@ -1,6 +1,6 @@
 import type { KlineRow } from "db";
 import type { KlineInterval } from "core";
-import type { Kline } from "./types.ts";
+import type { Kline } from "./types.js";
 
 export function buildKlineRows(
   symbol: string,
