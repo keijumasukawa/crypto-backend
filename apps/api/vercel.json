@@ -1,4 +1,4 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "buildCommand": "pnpm --filter db exec prisma generate"
+  "buildCommand": "pnpm --filter db run generate && pnpm --recursive run build"
 }
