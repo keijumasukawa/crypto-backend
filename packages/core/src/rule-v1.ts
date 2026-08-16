@@ -1,5 +1,7 @@
 import { Decimal, roundDecimal } from "./decimal.js";
 import type {
+  ExpandedSignalComponents,
+  ExpandedSignalRule,
   PreviousSignalInput,
   RuleResult,
   Signal,
@@ -7,10 +9,19 @@ import type {
   SignalDirection,
   SignalInput,
   SignalRule,
+  SignalRuleId,
   StoredSignalComponents,
 } from "./types.js";
 
 export const RULE_V1_LOGIC_VERSION = "rule-v1";
+
+const RULE_IDS: readonly SignalRuleId[] = [
+  "maTrend",
+  "maCross",
+  "rsiRecross",
+  "macdReversal",
+  "bollingerReversion",
+];
 
 const RULE_WEIGHT = 1;
 const RSI_OVERSOLD = 30;
@@ -205,4 +216,40 @@ export function convertToStoredComponents(
     0,
   );
   return { v: values, e: bitmask };
+}
+
+export function isStoredSignalComponents(
+  value: unknown,
+): value is StoredSignalComponents {
+  if (typeof value !== "object" || value === null) {
+    return false;
+  }
+  const record = value as Record<string, unknown>;
+  return (
+    Array.isArray(record.v) &&
+    record.v.length === RULE_IDS.length &&
+    record.v.every((item) => item === -1 || item === 0 || item === 1) &&
+    typeof record.e === "number" &&
+    Number.isInteger(record.e) &&
+    record.e >= 0 &&
+    record.e < 1 << RULE_IDS.length
+  );
+}
+
+export function convertToExpandedComponents(
+  stored: StoredSignalComponents,
+): ExpandedSignalComponents {
+  const rules = Object.fromEntries(
+    RULE_IDS.map((id, index) => [
+      id,
+      {
+        value: stored.v[index] ?? 0,
+        evaluable: (stored.e & (1 << index)) !== 0,
+      },
+    ]),
+  ) as Record<SignalRuleId, ExpandedSignalRule>;
+  const evaluableCount = RULE_IDS.filter(
+    (id, index) => (stored.e & (1 << index)) !== 0,
+  ).length;
+  return { ...rules, evaluableCount };
 }

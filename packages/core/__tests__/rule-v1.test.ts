@@ -2,7 +2,9 @@ import { describe, expect, it } from "vitest";
 import { Decimal } from "../src/decimal.js";
 import {
   calculateRuleV1Signal,
+  convertToExpandedComponents,
   convertToStoredComponents,
+  isStoredSignalComponents,
 } from "../src/rule-v1.js";
 import type {
   PreviousSignalInput,
@@ -402,5 +404,58 @@ describe("convertToStoredComponents", () => {
     const stored = convertToStoredComponents(signal.components);
 
     expect(stored).toEqual({ v: [0, 0, 0, 0, 0], e: 0 });
+  });
+});
+
+describe("isStoredSignalComponents", () => {
+  it("圧縮表現の形式を満たす値を受理する", () => {
+    expect(isStoredSignalComponents({ v: [1, 0, -1, 0, 1], e: 31 })).toBe(true);
+    expect(isStoredSignalComponents({ v: [0, 0, 0, 0, 0], e: 0 })).toBe(true);
+  });
+
+  it("形式を満たさない値を拒否する", () => {
+    expect(isStoredSignalComponents(null)).toBe(false);
+    expect(isStoredSignalComponents({ v: [1, 0, 1, 0], e: 31 })).toBe(false);
+    expect(isStoredSignalComponents({ v: [2, 0, 0, 0, 0], e: 31 })).toBe(false);
+    expect(isStoredSignalComponents({ v: [1, 0, 1, 0, 0], e: 32 })).toBe(false);
+    expect(isStoredSignalComponents({ v: [1, 0, 1, 0, 0], e: -1 })).toBe(false);
+    expect(isStoredSignalComponents({ p: 0.6, m: "ml-v1.0" })).toBe(false);
+  });
+});
+
+describe("convertToExpandedComponents", () => {
+  it("判定値とビットマスクをルール別の展開表現へ変換する", () => {
+    const expanded = convertToExpandedComponents({ v: [1, 0, -1, 0, 1], e: 5 });
+
+    expect(expanded).toEqual({
+      maTrend: { value: 1, evaluable: true },
+      maCross: { value: 0, evaluable: false },
+      rsiRecross: { value: -1, evaluable: true },
+      macdReversal: { value: 0, evaluable: false },
+      bollingerReversion: { value: 1, evaluable: false },
+      evaluableCount: 2,
+    });
+  });
+
+  it("calculateRuleV1Signal の components と往復で一致する", () => {
+    const previous = buildNullPrevious();
+    const current = buildInput({
+      close: buildDecimal("110"),
+      sma50: buildDecimal("105"),
+      sma200: buildDecimal("100"),
+    });
+
+    const signal = calculateRuleV1Signal(previous, current);
+    const expanded = convertToExpandedComponents(
+      convertToStoredComponents(signal.components),
+    );
+
+    for (const rule of signal.components.rules) {
+      expect(expanded[rule.id]).toEqual({
+        value: rule.value,
+        evaluable: rule.evaluable,
+      });
+    }
+    expect(expanded.evaluableCount).toBe(signal.components.evaluableCount);
   });
 });
