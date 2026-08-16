@@ -6,10 +6,11 @@
   "engines": {
     "node": "^24.0.0"
   },
+  "packageManager": "pnpm@11.21.0",
   "devEngines": {
     "packageManager": {
       "name": "pnpm",
-      "version": "^11.21.0",
+      "version": "11.21.0",
       "onFail": "download"
     }
   },
