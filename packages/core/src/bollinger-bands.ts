@@ -1,5 +1,5 @@
-import { Decimal, roundDecimal } from "./decimal.ts";
-import type { BollingerBands } from "./types.ts";
+import { Decimal, roundDecimal } from "./decimal.js";
+import type { BollingerBands } from "./types.js";
 
 export function calculateBollingerBands(
   closes: Decimal[],

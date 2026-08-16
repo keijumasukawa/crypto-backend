@@ -1,10 +1,10 @@
-import { Prisma, type PrismaClient } from "../generated/prisma/client.ts";
+import { Prisma, type PrismaClient } from "../generated/prisma/client.js";
 import type {
   IndicatorValueRow,
   KlineRow,
   SignalRow,
   SqlExecutor,
-} from "./types.ts";
+} from "./types.js";
 
 const BATCH_SIZE = 1000;
 

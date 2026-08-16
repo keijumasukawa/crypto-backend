@@ -1,13 +1,13 @@
 import { describe, expect, it } from "vitest";
-import type { Prisma, PrismaClient } from "../generated/prisma/client.ts";
-import type { IndicatorValueRow, KlineRow, SignalRow } from "../src/types.ts";
+import type { Prisma, PrismaClient } from "../generated/prisma/client.js";
+import type { IndicatorValueRow, KlineRow, SignalRow } from "../src/types.js";
 import {
   deleteIndicatorValuesFrom,
   deleteSignalsFrom,
   updateIndicatorValues,
   updateKlines,
   updateSignals,
-} from "../src/write.ts";
+} from "../src/write.js";
 
 function buildExecutorStub() {
   const queries: Prisma.Sql[] = [];

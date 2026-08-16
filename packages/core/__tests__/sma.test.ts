@@ -1,10 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { calculateSma } from "../src/sma.ts";
+import { calculateSma } from "../src/sma.js";
 import {
   buildFixtureCloses,
   convertToDecimals,
   convertToStrings,
-} from "./helpers.ts";
+} from "./helpers.js";
 
 describe("calculateSma", () => {
   it("既知データと一致する(期間 3)", () => {

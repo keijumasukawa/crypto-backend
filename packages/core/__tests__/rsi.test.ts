@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
-import { calculateRsi } from "../src/rsi.ts";
-import type { RsiValue } from "../src/types.ts";
-import { buildFixtureCloses, convertToDecimals } from "./helpers.ts";
+import { calculateRsi } from "../src/rsi.js";
+import type { RsiValue } from "../src/types.js";
+import { buildFixtureCloses, convertToDecimals } from "./helpers.js";
 
 function convertToStrings(values: (RsiValue | null)[]) {
   return values.map((value) =>

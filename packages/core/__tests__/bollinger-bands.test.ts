@@ -1,8 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { calculateBollingerBands } from "../src/bollinger-bands.ts";
-import type { BollingerBands } from "../src/types.ts";
-import { calculateSma } from "../src/sma.ts";
-import { buildFixtureCloses, convertToDecimals } from "./helpers.ts";
+import { calculateBollingerBands } from "../src/bollinger-bands.js";
+import type { BollingerBands } from "../src/types.js";
+import { calculateSma } from "../src/sma.js";
+import { buildFixtureCloses, convertToDecimals } from "./helpers.js";
 
 function convertToStrings(values: (BollingerBands | null)[]) {
   return values.map((value) =>
