@@ -8,7 +8,7 @@ import {
   type PrismaClient,
 } from "db";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { createApp } from "../src/app.js";
+import { createApp } from "../src/create-app.js";
 
 vi.mock("db", () => ({
   getLatestKlineCloseTime: vi.fn(),
