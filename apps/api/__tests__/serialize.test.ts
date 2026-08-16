@@ -125,9 +125,26 @@ describe("convertToSignalResponse", () => {
     expect(response.openTime).toBe(1786320000000);
   });
 
-  it("components を無変換で通す", () => {
+  it("rule-v1 の components を展開表現へ変換する", () => {
     const response = convertToSignalResponse(buildSignalRow());
 
-    expect(response.components).toEqual({ v: [1, 0, 1, 0, 0], e: 31 });
+    expect(response.components).toEqual({
+      maTrend: { value: 1, evaluable: true },
+      maCross: { value: 0, evaluable: true },
+      rsiRecross: { value: 1, evaluable: true },
+      macdReversal: { value: 0, evaluable: true },
+      bollingerReversion: { value: 0, evaluable: true },
+      evaluableCount: 5,
+    });
+  });
+
+  it("rule-v1 以外の components は無変換で通す", () => {
+    const response = convertToSignalResponse({
+      ...buildSignalRow(),
+      logicVersion: "ml-v1",
+      components: { p: 0.61, m: "ml-v1.0" },
+    });
+
+    expect(response.components).toEqual({ p: 0.61, m: "ml-v1.0" });
   });
 });

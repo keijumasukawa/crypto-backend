@@ -1,4 +1,10 @@
-import { Decimal, DECIMAL_PLACES } from "core";
+import {
+  convertToExpandedComponents,
+  Decimal,
+  DECIMAL_PLACES,
+  isStoredSignalComponents,
+  RULE_V1_LOGIC_VERSION,
+} from "core";
 import type { IndicatorValueRow, KlineRow, SignalRow, SymbolRecord } from "db";
 import type {
   IndicatorValueResponse,
@@ -65,6 +71,16 @@ export function convertToSymbolResponse(record: SymbolRecord): SymbolResponse {
   };
 }
 
+function convertComponents(logicVersion: string, components: unknown): unknown {
+  if (
+    logicVersion === RULE_V1_LOGIC_VERSION &&
+    isStoredSignalComponents(components)
+  ) {
+    return convertToExpandedComponents(components);
+  }
+  return components;
+}
+
 export function convertToSignalResponse(row: SignalRow): SignalResponse {
   return {
     symbol: row.symbol,
@@ -73,7 +89,7 @@ export function convertToSignalResponse(row: SignalRow): SignalResponse {
     logicVersion: row.logicVersion,
     direction: row.direction,
     score: formatDecimal(row.score),
-    components: row.components,
+    components: convertComponents(row.logicVersion, row.components),
     generatedAt: row.generatedAt.toISOString(),
   };
 }

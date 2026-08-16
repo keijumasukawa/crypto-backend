@@ -83,3 +83,15 @@ export type StoredSignalComponents = {
   v: RuleResult[];
   e: number;
 };
+
+export type ExpandedSignalRule = {
+  value: RuleResult;
+  evaluable: boolean;
+};
+
+export type ExpandedSignalComponents = Record<
+  SignalRuleId,
+  ExpandedSignalRule
+> & {
+  evaluableCount: number;
+};

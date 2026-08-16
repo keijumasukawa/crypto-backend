@@ -270,7 +270,14 @@ describe("GET /api/signals", () => {
         logicVersion: "rule-v1",
         direction: "bullish",
         score: "0.4000000000",
-        components: { v: [1, 1, 0, 0, 0], e: 31 },
+        components: {
+          maTrend: { value: 1, evaluable: true },
+          maCross: { value: 1, evaluable: true },
+          rsiRecross: { value: 0, evaluable: true },
+          macdReversal: { value: 0, evaluable: true },
+          bollingerReversion: { value: 0, evaluable: true },
+          evaluableCount: 5,
+        },
         generatedAt: "2026-08-06T00:00:00.000Z",
       },
     ]);
@@ -331,7 +338,14 @@ describe("GET /api/signals/latest", () => {
         logicVersion: "rule-v1",
         direction: "neutral",
         score: "0.2000000000",
-        components: { v: [1, 0, 0, 0, 0], e: 31 },
+        components: {
+          maTrend: { value: 1, evaluable: true },
+          maCross: { value: 0, evaluable: true },
+          rsiRecross: { value: 0, evaluable: true },
+          macdReversal: { value: 0, evaluable: true },
+          bollingerReversion: { value: 0, evaluable: true },
+          evaluableCount: 5,
+        },
         generatedAt: "2026-08-06T00:00:00.000Z",
       },
     ]);
