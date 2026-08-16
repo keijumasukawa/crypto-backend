@@ -169,28 +169,32 @@ export async function listKlines(
   endTime: bigint | null,
   limit: number,
 ): Promise<KlineRow[]> {
-  if (startTime === null && endTime === null) {
+  if (startTime !== null) {
     const records = await db.kline.findMany({
-      where: { symbol, interval },
-      orderBy: { openTime: "desc" },
+      where: {
+        symbol,
+        interval,
+        openTime: {
+          gte: startTime,
+          ...(endTime === null ? {} : { lte: endTime }),
+        },
+      },
+      orderBy: { openTime: "asc" },
       take: limit,
     });
-    return records.reverse().map(convertToKlineRow);
+    return records.map(convertToKlineRow);
   }
 
   const records = await db.kline.findMany({
     where: {
       symbol,
       interval,
-      openTime: {
-        ...(startTime === null ? {} : { gte: startTime }),
-        ...(endTime === null ? {} : { lte: endTime }),
-      },
+      ...(endTime === null ? {} : { openTime: { lte: endTime } }),
     },
-    orderBy: { openTime: "asc" },
+    orderBy: { openTime: "desc" },
     take: limit,
   });
-  return records.map(convertToKlineRow);
+  return records.reverse().map(convertToKlineRow);
 }
 
 export async function getLatestIndicatorValueOpenTime(
@@ -255,28 +259,32 @@ export async function listIndicatorValues(
   endTime: bigint | null,
   limit: number,
 ): Promise<IndicatorValueRow[]> {
-  if (startTime === null && endTime === null) {
+  if (startTime !== null) {
     const records = await db.indicatorValue.findMany({
-      where: { symbol, interval },
-      orderBy: { openTime: "desc" },
+      where: {
+        symbol,
+        interval,
+        openTime: {
+          gte: startTime,
+          ...(endTime === null ? {} : { lte: endTime }),
+        },
+      },
+      orderBy: { openTime: "asc" },
       take: limit,
     });
-    return records.reverse().map(convertToIndicatorValueRow);
+    return records.map(convertToIndicatorValueRow);
   }
 
   const records = await db.indicatorValue.findMany({
     where: {
       symbol,
       interval,
-      openTime: {
-        ...(startTime === null ? {} : { gte: startTime }),
-        ...(endTime === null ? {} : { lte: endTime }),
-      },
+      ...(endTime === null ? {} : { openTime: { lte: endTime } }),
     },
-    orderBy: { openTime: "asc" },
+    orderBy: { openTime: "desc" },
     take: limit,
   });
-  return records.map(convertToIndicatorValueRow);
+  return records.reverse().map(convertToIndicatorValueRow);
 }
 
 export async function getLatestKlineCloseTime(
@@ -314,13 +322,21 @@ export async function listSignals(
   endTime: bigint | null,
   limit: number,
 ): Promise<SignalRow[]> {
-  if (startTime === null && endTime === null) {
+  if (startTime !== null) {
     const records = await db.signal.findMany({
-      where: { symbol, interval, logicVersion },
-      orderBy: { openTime: "desc" },
+      where: {
+        symbol,
+        interval,
+        logicVersion,
+        openTime: {
+          gte: startTime,
+          ...(endTime === null ? {} : { lte: endTime }),
+        },
+      },
+      orderBy: { openTime: "asc" },
       take: limit,
     });
-    return records.reverse().map(convertToSignalRow);
+    return records.map(convertToSignalRow);
   }
 
   const records = await db.signal.findMany({
@@ -328,15 +344,12 @@ export async function listSignals(
       symbol,
       interval,
       logicVersion,
-      openTime: {
-        ...(startTime === null ? {} : { gte: startTime }),
-        ...(endTime === null ? {} : { lte: endTime }),
-      },
+      ...(endTime === null ? {} : { openTime: { lte: endTime } }),
     },
-    orderBy: { openTime: "asc" },
+    orderBy: { openTime: "desc" },
     take: limit,
   });
-  return records.map(convertToSignalRow);
+  return records.reverse().map(convertToSignalRow);
 }
 
 export async function listLatestSignals(
