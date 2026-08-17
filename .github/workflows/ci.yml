@@ -24,3 +24,18 @@ jobs:
       - run: pnpm --recursive run build
       - run: pnpm typecheck
       - run: pnpm test
+
+  verify-python:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/ml
+    steps:
+      - uses: actions/checkout@v7
+      - uses: astral-sh/setup-uv@v9
+        with:
+          enable-cache: true
+      - run: uv sync --locked --all-extras --dev
+      - run: uv run ruff check
+      - run: uv run ruff format --check
+      - run: uv run pytest
