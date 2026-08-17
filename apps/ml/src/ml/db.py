@@ -3,6 +3,7 @@ from collections.abc import Sequence
 from typing import Final
 
 import polars as pl
+from adbc_driver_postgresql.dbapi import connect
 
 KLINE_INTERVALS: Final = ("1h", "4h", "1d")
 SYMBOL_PATTERN: Final = re.compile(r"[A-Z0-9]+")
@@ -51,6 +52,20 @@ INDICATOR_VALUE_COLUMNS: Final = (
     "bb_lower",
 )
 INDICATOR_VALUE_DECIMAL_COLUMNS: Final = INDICATOR_VALUE_COLUMNS[3:]
+
+SIGNAL_COLUMNS: Final = (
+    "symbol",
+    "interval",
+    "open_time",
+    "logic_version",
+    "direction",
+    "score",
+    "components",
+    "generated_at",
+)
+SIGNAL_UPDATE_COLUMNS: Final = ("direction", "score", "components", "generated_at")
+SIGNALS_STAGING_TABLE: Final = "signals_staging"
+ML_LOGIC_VERSION: Final = "ml-v1"
 
 ADBC_ENGINE: Final = "adbc"
 
@@ -160,3 +175,51 @@ def list_indicator_values(
     query = build_indicator_values_query(interval, symbols, start_time)
     frame = pl.read_database_uri(query, uri, engine=ADBC_ENGINE)
     return convert_decimal_columns(frame, INDICATOR_VALUE_DECIMAL_COLUMNS)
+
+
+def validate_signal_frame(frame: pl.DataFrame) -> pl.DataFrame:
+    missing_columns = [
+        column for column in SIGNAL_COLUMNS if column not in frame.columns
+    ]
+    if missing_columns:
+        message = f"signals の列 {'、'.join(missing_columns)} がありません。"
+        raise ValueError(message)
+    extra_columns = [column for column in frame.columns if column not in SIGNAL_COLUMNS]
+    if extra_columns:
+        message = f"signals にない列 {'、'.join(extra_columns)} が含まれています。"
+        raise ValueError(message)
+    logic_versions = frame.get_column("logic_version").unique().to_list()
+    if logic_versions and logic_versions != [ML_LOGIC_VERSION]:
+        message = f"logic_version は {ML_LOGIC_VERSION} のみ書き込めます。"
+        raise ValueError(message)
+    return frame.select(SIGNAL_COLUMNS)
+
+
+def build_signals_upsert_query(staging_table: str) -> str:
+    update_assignments = ", ".join(
+        f"{column} = EXCLUDED.{column}" for column in SIGNAL_UPDATE_COLUMNS
+    )
+    return (
+        f"INSERT INTO signals ({', '.join(SIGNAL_COLUMNS)})"
+        " SELECT symbol, interval, open_time, logic_version, direction,"
+        " score::numeric, components::jsonb, generated_at::timestamptz"
+        f" FROM {staging_table}"
+        " ON CONFLICT (symbol, interval, open_time, logic_version)"
+        f" DO UPDATE SET {update_assignments}"
+    )
+
+
+def update_signals(uri: str, frame: pl.DataFrame) -> int:
+    validated = validate_signal_frame(frame)
+    if validated.is_empty():
+        return 0
+    with connect(uri) as connection, connection.cursor() as cursor:
+        cursor.adbc_ingest(
+            SIGNALS_STAGING_TABLE,
+            validated,
+            mode="create_append",
+            temporary=True,
+        )
+        cursor.execute(build_signals_upsert_query(SIGNALS_STAGING_TABLE))
+        connection.commit()
+    return validated.height
