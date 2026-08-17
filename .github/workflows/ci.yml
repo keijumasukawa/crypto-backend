@@ -32,7 +32,7 @@ jobs:
         working-directory: apps/ml
     steps:
       - uses: actions/checkout@v7
-      - uses: astral-sh/setup-uv@v9
+      - uses: astral-sh/setup-uv@v10.0.1
         with:
           enable-cache: true
       - run: uv sync --locked --all-extras --dev
