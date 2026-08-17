@@ -24,3 +24,15 @@ updates:
       - dependency-name: "*"
         update-types:
           - version-update:semver-major
+  - package-ecosystem: uv
+    directory: /apps/ml
+    schedule:
+      interval: weekly
+    commit-message:
+      prefix: chore
+    cooldown:
+      default-days: 7
+    ignore:
+      - dependency-name: "*"
+        update-types:
+          - version-update:semver-major
