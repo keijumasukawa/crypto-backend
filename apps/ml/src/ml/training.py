@@ -21,23 +21,37 @@ NUM_BOOST_ROUND: Final = 1_000
 EARLY_STOPPING_ROUNDS: Final = 50
 
 
-def build_training_frame(
+def build_symbol_codes(symbols: Sequence[str]) -> dict[str, int]:
+    if not symbols:
+        message = "銘柄を 1 件以上指定してください。"
+        raise ValueError(message)
+    return {symbol: code for code, symbol in enumerate(sorted(symbols))}
+
+
+def build_prediction_frame(
     frame: pl.DataFrame,
     feature_columns: Sequence[str],
+    symbols: Sequence[str],
 ) -> pl.DataFrame:
     if BINARY_TARGET_COLUMN in feature_columns or "label" in feature_columns:
         message = "ラベルを特徴量に含めることはできません。"
         raise ValueError(message)
-    return (
-        frame.filter(pl.col("label").is_in([1, -1]))
-        .drop_nulls(list(feature_columns))
-        .with_columns(
-            (pl.col("label") == 1).cast(pl.Int8).alias(BINARY_TARGET_COLUMN),
-            pl.col("symbol")
-            .cast(pl.Categorical)
-            .to_physical()
-            .alias(SYMBOL_FEATURE_COLUMN),
-        )
+    symbol_codes = build_symbol_codes(symbols)
+    return frame.drop_nulls(list(feature_columns)).with_columns(
+        pl.col("symbol")
+        .replace_strict(symbol_codes, return_dtype=pl.Int32)
+        .alias(SYMBOL_FEATURE_COLUMN)
+    )
+
+
+def build_training_frame(
+    frame: pl.DataFrame,
+    feature_columns: Sequence[str],
+    symbols: Sequence[str],
+) -> pl.DataFrame:
+    prediction_frame = build_prediction_frame(frame, feature_columns, symbols)
+    return prediction_frame.filter(pl.col("label").is_in([1, -1])).with_columns(
+        (pl.col("label") == 1).cast(pl.Int8).alias(BINARY_TARGET_COLUMN)
     )
 
 
