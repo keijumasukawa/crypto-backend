@@ -5,6 +5,8 @@ from ml.features import (
     INDICATOR_FEATURE_COLUMNS,
     PRICE_FEATURE_COLUMNS,
     VOLATILITY_WINDOW,
+    calculate_calendar_features,
+    calculate_cross_symbol_features,
     calculate_indicator_features,
     calculate_price_features,
 )
@@ -167,3 +169,70 @@ def test_指標が欠損する区間は特徴量も欠損のまま伝播する()
     assert result.get_column("sma20_deviation").to_list() == [None]
     assert result.get_column("macd_hist_ratio").to_list() == [None]
     assert result.get_column("rsi14").to_list() == pytest.approx([65.4321098765])
+
+
+def test_BTCの直近リターンを他銘柄の行に結合する() -> None:
+    frame = pl.concat(
+        [
+            build_kline_frame([100.0, 110.0], "BTCUSDT"),
+            build_kline_frame([200.0, 210.0], "ETHUSDT"),
+        ]
+    )
+
+    result = calculate_cross_symbol_features(frame)
+    eth_rows = result.filter(pl.col("symbol") == "ETHUSDT")
+
+    assert eth_rows.get_column("btc_return").to_list() == pytest.approx([None, 0.1])
+
+
+def test_BTC自身の行にはBTCリターンを与えない() -> None:
+    frame = pl.concat(
+        [
+            build_kline_frame([100.0, 110.0], "BTCUSDT"),
+            build_kline_frame([200.0, 210.0], "ETHUSDT"),
+        ]
+    )
+
+    result = calculate_cross_symbol_features(frame)
+    btc_rows = result.filter(pl.col("symbol") == "BTCUSDT")
+
+    assert btc_rows.get_column("btc_return").to_list() == [None, None]
+
+
+def test_BTCの足が存在しない時刻は欠損とする() -> None:
+    frame = pl.concat(
+        [
+            build_kline_frame([100.0], "BTCUSDT"),
+            build_kline_frame([200.0, 210.0], "ETHUSDT"),
+        ]
+    )
+
+    result = calculate_cross_symbol_features(frame)
+    eth_rows = result.filter(pl.col("symbol") == "ETHUSDT")
+
+    assert eth_rows.get_column("btc_return").to_list() == [None, None]
+
+
+def test_曜日と時刻をUTCで付与する() -> None:
+    thursday_utc = 1_502_928_000_000
+    frame = pl.DataFrame(
+        {
+            "symbol": ["BTCUSDT", "BTCUSDT"],
+            "open_time": [thursday_utc, thursday_utc + 4 * HOUR],
+            "close": [100.0, 110.0],
+        }
+    )
+
+    result = calculate_calendar_features(frame, "4h")
+
+    assert result.get_column("day_of_week").to_list() == [4, 4]
+    assert result.get_column("hour_of_day").to_list() == [0, 4]
+
+
+def test_日足には時刻の特徴量を付与しない() -> None:
+    frame = build_kline_frame([100.0])
+
+    result = calculate_calendar_features(frame, "1d")
+
+    assert "day_of_week" in result.columns
+    assert "hour_of_day" not in result.columns

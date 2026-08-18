@@ -2,6 +2,8 @@ from typing import Final
 
 import polars as pl
 
+from ml.db import validate_interval
+
 RETURN_LAG_COUNT: Final = 5
 VOLATILITY_WINDOW: Final = 20
 
@@ -20,6 +22,11 @@ INDICATOR_FEATURE_COLUMNS: Final = (
     "rsi14",
     "macd_hist_ratio",
 )
+
+BASE_SYMBOL: Final = "BTCUSDT"
+CROSS_SYMBOL_FEATURE_COLUMNS: Final = ("btc_return",)
+DAY_OF_WEEK_COLUMN: Final = "day_of_week"
+HOUR_OF_DAY_COLUMN: Final = "hour_of_day"
 
 
 def calculate_price_features(frame: pl.DataFrame) -> pl.DataFrame:
@@ -50,3 +57,32 @@ def calculate_indicator_features(frame: pl.DataFrame) -> pl.DataFrame:
     )
     macd_hist_ratio = (pl.col("macd_hist") / pl.col("close")).alias("macd_hist_ratio")
     return frame.with_columns(*deviations, bb_position, macd_hist_ratio)
+
+
+def calculate_cross_symbol_features(frame: pl.DataFrame) -> pl.DataFrame:
+    base_returns = (
+        frame.filter(pl.col("symbol") == BASE_SYMBOL)
+        .sort("open_time")
+        .select(
+            "open_time",
+            (pl.col("close") / pl.col("close").shift(1) - 1).alias("btc_return"),
+        )
+    )
+    joined = frame.sort("symbol", "open_time").join(
+        base_returns, on="open_time", how="left"
+    )
+    return joined.with_columns(
+        pl.when(pl.col("symbol") == BASE_SYMBOL)
+        .then(None)
+        .otherwise(pl.col("btc_return"))
+        .alias("btc_return")
+    )
+
+
+def calculate_calendar_features(frame: pl.DataFrame, interval: str) -> pl.DataFrame:
+    validate_interval(interval)
+    open_datetime = pl.from_epoch("open_time", time_unit="ms")
+    columns = [open_datetime.dt.weekday().alias(DAY_OF_WEEK_COLUMN)]
+    if interval != "1d":
+        columns.append(open_datetime.dt.hour().alias(HOUR_OF_DAY_COLUMN))
+    return frame.with_columns(columns)
