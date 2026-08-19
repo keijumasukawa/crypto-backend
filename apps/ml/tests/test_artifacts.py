@@ -30,6 +30,7 @@ def build_metadata() -> ModelMetadata:
         train_end_open_time=1_600_000_000_000,
         hyperparameters={"num_leaves": 15, "objective": "binary"},
         feature_columns=("return_lag_1", "volatility_20"),
+        symbols=("BTCUSDT", "ETHUSDT"),
         threshold=0.2,
         calibration=SigmoidCalibration(coefficient=1.1, intercept=-0.05),
         hit_rate_floor=0.52,
@@ -51,6 +52,7 @@ def test_等張較正のメタデータも往復できる() -> None:
         train_end_open_time=HOUR,
         hyperparameters={},
         feature_columns=("rsi14",),
+        symbols=("BTCUSDT",),
         threshold=0.1,
         calibration=IsotonicCalibration(thresholds=(0.2, 0.8), values=(0.3, 0.7)),
         hit_rate_floor=0.5,
@@ -90,7 +92,9 @@ def test_保存したモデルは同じ予測を返す(
     tmp_path_factory: pytest.TempPathFactory,
 ) -> None:
     directory = tmp_path_factory.mktemp("model_artifacts")
-    frame = build_training_frame(build_labeled_frame(1_000), ("momentum",))
+    frame = build_training_frame(
+        build_labeled_frame(1_000), ("momentum",), ("BTCUSDT",)
+    )
     model = train_lightgbm(frame, frame, ("momentum",))
 
     create_model_artifacts(directory, model, build_metadata())
@@ -105,7 +109,9 @@ def test_成果物は2つのファイルとして出力される(
     tmp_path_factory: pytest.TempPathFactory,
 ) -> None:
     directory = tmp_path_factory.mktemp("model_artifacts")
-    frame = build_training_frame(build_labeled_frame(1_000), ("momentum",))
+    frame = build_training_frame(
+        build_labeled_frame(1_000), ("momentum",), ("BTCUSDT",)
+    )
     model = train_lightgbm(frame, frame, ("momentum",))
     metadata = build_metadata()
 

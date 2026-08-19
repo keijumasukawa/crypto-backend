@@ -19,6 +19,7 @@ class ModelMetadata:
     train_end_open_time: int
     hyperparameters: dict[str, float | int | str]
     feature_columns: tuple[str, ...]
+    symbols: tuple[str, ...]
     threshold: float
     calibration: Calibration
     hit_rate_floor: float
@@ -66,6 +67,7 @@ def convert_metadata_to_json(metadata: ModelMetadata) -> str:
         "train_end_open_time": metadata.train_end_open_time,
         "hyperparameters": metadata.hyperparameters,
         "feature_columns": list(metadata.feature_columns),
+        "symbols": list(metadata.symbols),
         "threshold": metadata.threshold,
         "calibration": convert_calibration_to_dict(metadata.calibration),
         "hit_rate_floor": metadata.hit_rate_floor,
@@ -89,6 +91,7 @@ def parse_metadata(json_text: str) -> ModelMetadata:
             train_end_open_time=int(data["train_end_open_time"]),
             hyperparameters=dict(data["hyperparameters"]),
             feature_columns=tuple(str(value) for value in data["feature_columns"]),
+            symbols=tuple(str(value) for value in data["symbols"]),
             threshold=float(data["threshold"]),
             calibration=parse_calibration(data["calibration"]),
             hit_rate_floor=float(data["hit_rate_floor"]),

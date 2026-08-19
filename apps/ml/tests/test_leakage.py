@@ -167,9 +167,11 @@ def test_シャッフルは同じ乱数の種で同じ並びを返す() -> None:
 
 
 def test_健全な学習はシャッフル検査を通過する() -> None:
-    train_frame = build_training_frame(build_learnable_frame(1_000), ("momentum",))
+    train_frame = build_training_frame(
+        build_learnable_frame(1_000), ("momentum",), ("BTCUSDT",)
+    )
     validation_frame = build_training_frame(
-        build_learnable_frame(400, 1_000), ("momentum",)
+        build_learnable_frame(400, 1_000), ("momentum",), ("BTCUSDT",)
     )
 
     auc = validate_shuffled_label_training(
@@ -180,7 +182,9 @@ def test_健全な学習はシャッフル検査を通過する() -> None:
 
 
 def test_反復回数が1未満の指定を拒否する() -> None:
-    train_frame = build_training_frame(build_learnable_frame(1_000), ("momentum",))
+    train_frame = build_training_frame(
+        build_learnable_frame(1_000), ("momentum",), ("BTCUSDT",)
+    )
 
     with pytest.raises(ValueError, match="1 以上"):
         validate_shuffled_label_training(
