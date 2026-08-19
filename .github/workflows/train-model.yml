@@ -29,6 +29,17 @@ jobs:
         env:
           DIRECT_URL: ${{ secrets.DIRECT_URL }}
           INTERVAL: ${{ inputs.interval }}
+      - name: 評価結果を Storage へ保管
+        run: |
+          curl --fail -X POST "$SUPABASE_URL/storage/v1/object/evaluations/ml-v1/${{ inputs.interval }}/${{ github.run_id }}.json" \
+            -H "apikey: $SUPABASE_SECRET_KEY" \
+            -H "Authorization: Bearer $SUPABASE_SECRET_KEY" \
+            -H "Content-Type: application/json" \
+            -H "x-upsert: true" \
+            --data-binary "@evaluation.json"
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SECRET_KEY: ${{ secrets.SUPABASE_SECRET_KEY }}
       - name: モデル成果物のプルリクエストを作成
         run: |
           git config user.name "github-actions[bot]"
