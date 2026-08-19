@@ -1,0 +1,42 @@
+name: Train Model
+
+on:
+  workflow_dispatch:
+    inputs:
+      interval:
+        description: 対象のインターバル
+        required: true
+        type: choice
+        options: [1h, 4h, 1d]
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  train:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/ml
+    steps:
+      - uses: actions/checkout@v7
+      - uses: astral-sh/setup-uv@v10.0.1
+        with:
+          enable-cache: true
+      - run: uv sync --locked
+      - run: uv run train-model
+        env:
+          DIRECT_URL: ${{ secrets.DIRECT_URL }}
+          INTERVAL: ${{ inputs.interval }}
+      - name: モデル成果物のプルリクエストを作成
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git switch -c "chore/train-model-${{ inputs.interval }}-${{ github.run_id }}"
+          git add models
+          git commit -m "chore: update model artifacts (${{ inputs.interval }})"
+          git push origin HEAD
+          gh pr create --title "chore: update model artifacts (${{ inputs.interval }})" --body "Train Model (run ${{ github.run_id }}) による自動作成"
+        env:
+          GH_TOKEN: ${{ github.token }}
