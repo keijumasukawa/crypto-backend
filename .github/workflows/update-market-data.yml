@@ -27,3 +27,25 @@ jobs:
       - run: pnpm --filter batch run hourly
         env:
           DIRECT_URL: ${{ secrets.DIRECT_URL }}
+
+  predict:
+    needs: update
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/ml
+    steps:
+      - uses: actions/checkout@v7
+      - uses: astral-sh/setup-uv@v10.0.1
+        with:
+          enable-cache: true
+      - run: uv sync --locked
+      - name: モデルが存在するインターバルの推論を実行
+        run: |
+          for interval in 1h 4h 1d; do
+            if [ -f "models/ml-v1/$interval/model.txt" ]; then
+              INTERVAL="$interval" uv run predict-signals
+            fi
+          done
+        env:
+          DIRECT_URL: ${{ secrets.DIRECT_URL }}
