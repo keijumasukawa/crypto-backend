@@ -177,6 +177,23 @@ def list_indicator_values(
     return convert_decimal_columns(frame, INDICATOR_VALUE_DECIMAL_COLUMNS)
 
 
+def build_latest_signal_query(interval: str) -> str:
+    return (
+        "SELECT max(open_time) AS latest_open_time FROM signals"
+        f" WHERE interval = '{validate_interval(interval)}'"
+        f" AND logic_version = '{ML_LOGIC_VERSION}'"
+    )
+
+
+def get_latest_signal_open_time(uri: str, interval: str) -> int | None:
+    query = build_latest_signal_query(interval)
+    frame = pl.read_database_uri(query, uri, engine=ADBC_ENGINE)
+    latest_open_time = frame.get_column("latest_open_time").to_list()[0]
+    if latest_open_time is None:
+        return None
+    return int(latest_open_time)
+
+
 def validate_signal_frame(frame: pl.DataFrame) -> pl.DataFrame:
     missing_columns = [
         column for column in SIGNAL_COLUMNS if column not in frame.columns
