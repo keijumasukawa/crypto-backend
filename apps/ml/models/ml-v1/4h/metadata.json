@@ -1,0 +1,80 @@
+{
+  "calibration": {
+    "method": "isotonic",
+    "thresholds": [
+      0.4637627657216962,
+      0.4643467835603085,
+      0.4651562313772326,
+      0.49994494239061715,
+      0.49998930828039406,
+      0.5084343793869281,
+      0.5084350134926441,
+      0.5200785565590141,
+      0.5201046467573759,
+      0.5273542718880766,
+      0.5273676807435405,
+      0.5338193555511896,
+      0.5338285148482506,
+      0.5453817217968057,
+      0.5471057928594958
+    ],
+    "values": [
+      0.0,
+      0.0,
+      0.49156313740033375,
+      0.49156313740033375,
+      0.49405878674171355,
+      0.49405878674171355,
+      0.5201931518876207,
+      0.5201931518876207,
+      0.5438297872340425,
+      0.5438297872340425,
+      0.5568814638027048,
+      0.5568814638027048,
+      0.5627425614489004,
+      0.5627425614489004,
+      1.0
+    ]
+  },
+  "commit_sha": "67bab2da0ba154a86c274905397f10c483ffa97d",
+  "feature_columns": [
+    "return_lag_1",
+    "return_lag_2",
+    "return_lag_3",
+    "return_lag_4",
+    "return_lag_5",
+    "volatility_20",
+    "sma20_deviation",
+    "sma50_deviation",
+    "sma200_deviation",
+    "bb_position",
+    "rsi14",
+    "macd_hist_ratio",
+    "btc_return",
+    "day_of_week",
+    "hour_of_day"
+  ],
+  "hit_rate_floor": 0.430939226519337,
+  "hyperparameters": {
+    "feature_fraction": 0.8,
+    "learning_rate": 0.05,
+    "min_data_in_leaf": 200,
+    "num_leaves": 15,
+    "objective": "binary",
+    "seed": 20260818,
+    "verbosity": -1
+  },
+  "identifier": "ml-v1-4h-1758787200000",
+  "interval": "4h",
+  "symbols": [
+    "BNBUSDT",
+    "BTCUSDT",
+    "DOGEUSDT",
+    "ETHUSDT",
+    "SOLUSDT",
+    "XRPUSDT"
+  ],
+  "threshold": 0.5,
+  "train_end_open_time": 1758787200000,
+  "train_start_open_time": 1502942400000
+}
